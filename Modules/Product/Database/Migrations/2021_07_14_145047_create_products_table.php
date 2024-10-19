@@ -22,6 +22,7 @@ class CreateProductsTable extends Migration
             $table->integer('product_quantity')->nullable();
             $table->integer('product_cost')->nullable();
             $table->integer('product_price')->nullable();
+            $table->integer('moq')->nullable();
             $table->integer('wholesale_price')->nullable();
             $table->string('product_unit')->nullable();
             $table->integer('product_stock_alert')->nullable();

@@ -22,6 +22,7 @@ class StoreProductRequest extends FormRequest
             'product_quantity' => ['nullable', 'integer', 'min:1'],
             'product_cost' => ['required', 'numeric', 'max:2147483647'],
             'product_price' => ['required', 'numeric', 'max:2147483647'],
+            'moq' => ['nullable', 'numeric', 'max:2147483647'],
             'product_stock_alert' => ['nullable', 'integer', 'min:0'],
             'product_order_tax' => ['nullable', 'integer', 'min:0', 'max:100'],
             'product_tax_type' => ['nullable', 'integer'],

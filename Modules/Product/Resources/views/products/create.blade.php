@@ -99,6 +99,13 @@
                                             required value="{{ old('product_price') }}">
                                     </div>
                                 </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="moq">MOQ <span class="text-danger">*</span></label>
+                                        <input id="moq" type="text" class="form-control" name="moq"
+                                            required value="{{ old('moq') }}">
+                                    </div>
+                                </div>
                                 @if (env('WHOLESALE_RETAIL'))
                                     <div class="col-md-6">
                                         <div class="form-group">
