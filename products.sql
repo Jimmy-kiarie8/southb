@@ -1,4 +1,4 @@
-INSERT INTO tableName (product_code, product_name, Category, category_id, product_unit, product_price, moq) VALUES
+INSERT INTO products (product_code, product_name, Category, category_id, product_unit, product_price, moq) VALUES
 	('IT00001', 'Shower caps', 'Toiletries', '1', 'Pc', '15', '500'),
 	('IT00002', 'Corn starch shower cap', 'Toiletries', '1', 'Pc', '16', '500'),
 	('IT00003', 'Dental kit biodegradable wheat straw', 'Toiletries', '1', 'Pc', '50', '300'),
