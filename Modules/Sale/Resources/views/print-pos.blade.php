@@ -88,9 +88,9 @@
     <div style="max-width:400px;margin:0 auto">
         <div id="receipt-data">
             <div class="centered">
-                KWA NDEGE
+                {{ settings()->company_address }}
                 <h2 style="margin-bottom: 5px">{{ settings()->company_name }}</h2>
-
+                {{ env('KRA_PIN') }}
                 <strong>Cash Sale</strong>
                 <br>
                 <small>{{ $sale->created_at }}</small>
@@ -103,6 +103,8 @@
                 Date: {{ \Carbon\Carbon::parse($sale->date)->format('d M, Y') }}<br>
                 Receipt No: {{ $sale->reference }}<br>
                 Name: {{ $sale->customer_name }}
+                <br>
+                <b>{{ $sale->customer->pin }}</b>
             </p>
             @foreach ($sale->saleDetails as $saleDetail)
             <div style="border-bottom: 1px solid #999">
@@ -193,6 +195,8 @@
                                 Served by: <b>{{ Auth::user()->name }}</b>
                             </div>
                             <hr>
+
+                            <a href="www.amrosab.com">www.amrosab.com</a>
 
                         </td>
                     </tr>

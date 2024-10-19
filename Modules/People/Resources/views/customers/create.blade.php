@@ -40,28 +40,28 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="pin">PIN</label>
+                                        <input type="text" class="form-control" name="pin">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="customer_phone">Phone</label>
                                         <input type="text" class="form-control" name="customer_phone">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="city">City</label>
                                         <input type="text" class="form-control" name="city">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="country">PIN</label>
+                                        <label for="country">Country</label>
                                         <input type="text" class="form-control" name="country">
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="pin">PIN</label>
-                                        <input type="text" class="form-control" name="pin">
                                     </div>
                                 </div>
                             </div>

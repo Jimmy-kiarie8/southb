@@ -34,28 +34,36 @@
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="customer_email">Email <span class="text-danger">*</span></label>
+                                        <label for="customer_email">Email</label>
                                         <input type="email" class="form-control" name="customer_email" required value="{{ $customer->customer_email }}">
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-row">
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="customer_phone">Phone <span class="text-danger">*</span></label>
+                                        <label for="customer_phone">Phone</label>
                                         <input type="text" class="form-control" name="customer_phone" required value="{{ $customer->customer_phone }}">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+
+                                <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="city">City <span class="text-danger">*</span></label>
+                                        <label for="pin">Pin</label>
+                                        <input type="text" class="form-control" name="pin" required value="{{ $customer->pin }}">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="city">City</label>
                                         <input type="text" class="form-control" name="city" required value="{{ $customer->city }}">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label for="country">Country <span class="text-danger">*</span></label>
+                                        <label for="country">Country</label>
                                         <input type="text" class="form-control" name="country" required value="{{ $customer->country }}">
                                     </div>
                                 </div>
@@ -64,7 +72,7 @@
                             <div class="form-row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
-                                        <label for="address">Address <span class="text-danger">*</span></label>
+                                        <label for="address">Address</label>
                                         <input type="text" class="form-control" name="address" required value="{{ $customer->address }}">
                                     </div>
                                 </div>
