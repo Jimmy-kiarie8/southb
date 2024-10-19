@@ -177,4 +177,9 @@ class LpoController extends Controller
 
         return redirect()->route('lpo.index');
     }
+
+
+    public function grn(Request $request) {
+
+    }
 }

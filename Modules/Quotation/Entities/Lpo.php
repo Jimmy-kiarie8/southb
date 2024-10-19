@@ -12,6 +12,7 @@ class Lpo extends Model
     use HasFactory;
 
     protected $guarded = [];
+    protected $fillable = ['status'];
 
     public function lpoDetails() {
         return $this->hasMany(LpoDetail::class, 'lpo_id', 'id');

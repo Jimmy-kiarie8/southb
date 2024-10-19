@@ -58,4 +58,7 @@ Route::group(['middleware' => 'auth'], function () {
     //Sales Form Quotation
     Route::get('/lpo-sales/{quotation}', 'LpoSalesController')->name('lpo-sales.create');
 
+
+    Route::get('/grn', 'LpoController@grn')->name('grn.store');
+
 });

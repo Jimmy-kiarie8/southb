@@ -35,7 +35,7 @@ class PurchaseDataTable extends DataTable
     }
 
     public function query(Purchase $model) {
-        return $model->orderBy('date', 'DESC')->newQuery();
+        return $model->orderBy('created_at', 'DESC')->newQuery();
     }
 
     public function html() {

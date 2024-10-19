@@ -23,7 +23,7 @@
                 <div class="card">
                     <div class="card-body">
                         @include('utils.alerts')
-                        <form id="sale-form" action="{{ route('sales.store') }}" method="POST">
+                        <form id="sale-form" action="{{ route('purchases.store') }}" method="POST">
                             @csrf
 
                             <div class="form-row">
@@ -34,14 +34,17 @@
                                             value="SL">
                                     </div>
                                 </div>
+                                <input type="hidden" class="form-control" name="location_id" value="1">
+
+                                <input type="hidden" class="form-control" name="lpo_id" value="{{ $lpo_id }}">
                                 <div class="col-lg-4">
                                     <div class="from-group">
                                         <div class="form-group">
-                                            <label for="customer_id">Customer <span class="text-danger">*</span></label>
-                                            <select class="form-control" name="customer_id" id="customer_id" required>
-                                                @foreach (\Modules\People\Entities\Customer::all() as $customer)
-                                                    <option {{ $sale->customer_id == $customer->id ? 'selected' : '' }}
-                                                        value="{{ $customer->id }}">{{ $customer->customer_name }}</option>
+                                            <label for="supplier_id">Supplier <span class="text-danger">*</span></label>
+                                            <select class="form-control" name="supplier_id" id="supplier_id" required>
+                                                @foreach (\Modules\People\Entities\Supplier::all() as $customer)
+                                                    <option {{ $sale->supplier_id == $customer->id ? 'selected' : '' }}
+                                                        value="{{ $customer->id }}">{{ $customer->supplier_name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -58,7 +61,7 @@
                                 </div>
                             </div>
 
-                            <livewire:product-cart :cartInstance="'sale'" :data="$sale" />
+                            <livewire:product-cart :cartInstance="'purchases'" :data="$sale" />
 
                             <div class="form-row">
                                 <div class="col-lg-4">
@@ -111,7 +114,7 @@
 
                             <div class="mt-3">
                                 <button type="submit" class="btn btn-primary" id="submit-btn">
-                                    Create Sale <i class="bi bi-check"></i>
+                                    Create <i class="bi bi-check"></i>
                                 </button>
                             </div>
                         </form>

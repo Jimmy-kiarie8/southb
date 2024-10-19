@@ -79,6 +79,7 @@ class ProductCart extends Component
     public function productSelected($product)
     {
         $cart = Cart::instance($this->cart_instance);
+        // dd($this->cart_instance);
 
         $exists = $cart->search(function ($cartItem, $rowId) use ($product) {
             return $cartItem->id == $product['id'];
@@ -122,7 +123,7 @@ class ProductCart extends Component
                 'stock'                 => $product['product_quantity'],
                 'unit'                  => $product['product_unit'],
                 'product_tax'           => $this->calculate($product)['product_tax'],
-                'unit_price'            => ($this->cart_instance == 'purchase') ? $this->calculate($product)['product_cost'] :  $this->calculate($product)['unit_price'],
+                'unit_price'            => ($this->cart_instance == 'purchase' || $this->cart_instance == 'lpo') ? $this->calculate($product)['product_cost'] :  $this->calculate($product)['unit_price'],
                 'wholesale_price'       => $this->calculate($product)['wholesale_price'],
             ]
         ]);

@@ -3,11 +3,14 @@
         <i class="bi bi-three-dots-vertical"></i>
     </button>
     <div class="dropdown-menu">
-        @can('create_quotation_sales')
-            <a href="{{ route('lpo-sales.create', $data) }}" class="dropdown-item">
-                <i class="bi bi-check2-circle mr-2 text-success" style="line-height: 1;"></i> Make Sale
-            </a>
-        @endcan
+        @if ($data->status != 'Completed')
+            @can('create_quotation_sales')
+                <a href="{{ route('lpo-sales.create', $data) }}" class="dropdown-item">
+                    <i class="bi bi-check2-circle mr-2 text-success" style="line-height: 1;"></i> Receive
+                </a>
+            @endcan
+        @endif
+
         @can('send_quotation_mails')
             <a href="{{ route('lpo.email', $data) }}" class="dropdown-item">
                 <i class="bi bi-cursor mr-2 text-warning" style="line-height: 1;"></i> Send On Email
@@ -24,13 +27,15 @@
             </a>
         @endcan
         @can('delete_quotations')
-            <button id="delete" class="dropdown-item" onclick="
+            <button id="delete" class="dropdown-item"
+                onclick="
                 event.preventDefault();
                 if (confirm('Are you sure? It will delete the data permanently!')) {
                 document.getElementById('destroy{{ $data->id }}').submit()
                 }">
                 <i class="bi bi-trash mr-2 text-danger" style="line-height: 1;"></i> Delete
-                <form id="destroy{{ $data->id }}" class="d-none" action="{{ route('lpo.destroy', $data->id) }}" method="POST">
+                <form id="destroy{{ $data->id }}" class="d-none" action="{{ route('lpo.destroy', $data->id) }}"
+                    method="POST">
                     @csrf
                     @method('delete')
                 </form>

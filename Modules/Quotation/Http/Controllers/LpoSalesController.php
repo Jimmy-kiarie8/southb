@@ -16,9 +16,11 @@ class LpoSalesController extends Controller
 
         $quotation_details = $quotation->lpoDetails;
 
-        Cart::instance('sale')->destroy();
+        // dd($quotation_details);
 
-        $cart = Cart::instance('sale');
+        Cart::instance('purchases')->destroy();
+
+        $cart = Cart::instance('purchases');
 
         foreach ($quotation_details as $quotation_detail) {
             $cart->add([

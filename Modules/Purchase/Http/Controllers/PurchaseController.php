@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Modules\Branch\Entities\ProductBranch;
 use Modules\People\Entities\Supplier;
 use Modules\Product\Entities\Product;
@@ -16,6 +17,7 @@ use Modules\Purchase\Entities\PurchaseDetail;
 use Modules\Purchase\Entities\PurchasePayment;
 use Modules\Purchase\Http\Requests\StorePurchaseRequest;
 use Modules\Purchase\Http\Requests\UpdatePurchaseRequest;
+use Modules\Quotation\Entities\Lpo;
 
 class PurchaseController extends Controller
 {
@@ -40,33 +42,44 @@ class PurchaseController extends Controller
 
     public function store(StorePurchaseRequest $request)
     {
-        // $request->validate([
-        //     'array_field' => 'exists:table,column',
-        // ]);
 
-        // return $request->all();
+        // $instance = 'purchase';
+        // return $request->lpo_id;
 
-        // if ($request->stock_type != 'opening') {
-        //     $request->validate([
-        //         'supplier_id' => 'required|numeric',
-        //     ]);
-        // }
+        $instances = ['purchase', 'purchases']; // Define an array of possible instances
 
+        // Initialize a variable to track if there is any content in either instance
+        $isEmpty = true;
 
+        // Loop through each instance and check if it contains any content
+        foreach ($instances as $instance) {
+            if (count(Cart::instance($instance)->content()) > 0) {
+                $isEmpty = false;
+                break; // Exit loop if we find content in any instance
+            }
+        }
 
-        // dd($cart_total);
-        // return $request->all();
+        // If both instances are empty, redirect with an error
+        if ($isEmpty) {
+            return redirect()->back()->withErrors(['Please select a product']);
+        }
 
-
-        if (count(Cart::instance('purchase')->content()) < 1) {
+        if (count(Cart::instance($instance)->content()) < 1) {
             return redirect()->back()->withErrors(['Please select a product']);;
         }
 
-        // return Cart::instance('purchase')->content();
-        DB::transaction(function () use ($request) {
+        // return Cart::instance($instance)->content();
+        DB::transaction(function () use ($request, $instance) {
+
+            if($request->lpo_id) {
+                $lpo = Lpo::find($request->lpo_id);
+                if($lpo) {
+                    $lpo->update(['status' => 'Completed']);
+                }
+            }
 
             $cart_total = 0;
-            $cart_items = Cart::instance('purchase')->content();
+            $cart_items = Cart::instance($instance)->content();
 
             foreach ($cart_items as $item) {
                 $cart_total += $item->price * $item->qty;
@@ -99,13 +112,15 @@ class PurchaseController extends Controller
                 'is_openingstock' => ($request->stock_type == 'receipt') ? false : true,
                 'payment_method' => $request->payment_method,
                 'note' => $request->note,
-                'tax_amount' => Cart::instance('purchase')->tax(),
-                'discount_amount' => Cart::instance('purchase')->discount(),
+                'tax_amount' => Cart::instance($instance)->tax(),
+                'discount_amount' => Cart::instance($instance)->discount(),
             ]);
 
 
-            foreach (Cart::instance('purchase')->content() as $cart_item) {
+            foreach (Cart::instance($instance)->content() as $cart_item) {
                 $saleType = 'Retail';
+
+                Log::alert($cart_item);
 
                 if (env('WHOLESALE_RETAIL')) {
                     $saleType = $request->saleType[$cart_item->id];
@@ -139,10 +154,12 @@ class PurchaseController extends Controller
                     'product_tax_amount' => $cart_item->options->product_tax,
                 ]);
 
+
                 if ($request->status == 'Completed') {
                     $product = Product::findOrFail($cart_item->id);
                     $product->update([
-                        'product_quantity' => $product->product_quantity + $cart_item->qty
+                        'product_quantity' => $product->product_quantity + $cart_item->qty,
+                        'product_cost' => $unit_price
                     ]);
 
                     $product_branch = ProductBranch::where('product_id', $cart_item->id)->where('branch_id', $request->location_id)->first();
@@ -170,7 +187,7 @@ class PurchaseController extends Controller
                 }
             }
 
-            Cart::instance('purchase')->destroy();
+            Cart::instance($instance)->destroy();
 
             if ($purchase->paid_amount > 0) {
                 PurchasePayment::create([
