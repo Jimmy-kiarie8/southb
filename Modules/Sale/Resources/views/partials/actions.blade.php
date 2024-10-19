@@ -7,6 +7,10 @@
             <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> POS Invoice
         </a>
 
+        <a href="{{ route('sale-returns.create', ['sale_id' => $data->id]) }}" class="dropdown-item">
+            <i class="bi bi-file-earmark-pdf mr-2 text-danger" style="line-height: 1;"></i> Return
+        </a>
+
         <a target="_blank" href="{{ route('sales.delivery', $data->id) }}" class="dropdown-item">
             <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> Delivery Note
         </a>

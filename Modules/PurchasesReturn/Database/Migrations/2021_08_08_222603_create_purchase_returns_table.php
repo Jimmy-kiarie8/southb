@@ -26,6 +26,7 @@ class CreatePurchaseReturnsTable extends Migration
             $table->integer('shipping_amount')->default(0);
             $table->integer('total_amount');
             $table->integer('paid_amount');
+            $table->integer('purchase_id');
             $table->integer('due_amount');
             $table->string('status');
             $table->string('payment_status');

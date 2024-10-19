@@ -53,8 +53,9 @@
                                     </div>
                                 </div>
                             </div>
+                            {{ $purchase_id }}
 
-                            <livewire:product-cart :cartInstance="'purchase_return'"/>
+                            <livewire:product-cart :cartInstance="'purchase_return'" :purchase_id="$purchase_id" />
 
                             <div class="form-row">
                                 <div class="col-lg-4">
@@ -95,6 +96,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <input type="hidden" name="purchase_id" value="{{ $purchase_id }}">
 
                             <div class="form-group">
                                 <label for="note">Note (If Needed)</label>

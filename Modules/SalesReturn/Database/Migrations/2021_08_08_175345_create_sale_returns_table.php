@@ -27,6 +27,7 @@ class CreateSaleReturnsTable extends Migration
             $table->integer('total_amount');
             $table->integer('paid_amount');
             $table->integer('due_amount');
+            $table->integer('sale_id')->nullable();
             $table->string('status');
             $table->string('payment_status');
             $table->string('payment_method');

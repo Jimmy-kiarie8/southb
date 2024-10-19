@@ -1,0 +1,11 @@
+{
+    "name": "GoodIssue",
+    "alias": "goodissue",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\GoodIssue\\Providers\\GoodIssueServiceProvider"
+    ],
+    "files": []
+}

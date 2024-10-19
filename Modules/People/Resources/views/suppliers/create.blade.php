@@ -40,19 +40,25 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="supplier_phone">Phone</label>
                                         <input type="text" class="form-control" name="supplier_phone">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="pin">Pin</label>
+                                        <input type="text" class="form-control" name="pin">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="city">City</label>
                                         <input type="text" class="form-control" name="city">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="country">Country</label>
                                         <input type="text" class="form-control" name="country">

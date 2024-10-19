@@ -34,7 +34,7 @@
                                     <div>{{ settings()->company_address }}</div>
                                     <div>Email: {{ settings()->company_email }}</div>
                                     <div>Phone: {{ settings()->company_phone }}</div>
-                                    <div>PIN: P051828064U</div>
+                                    <div>PIN:  {{ env('KRA_PIN') }}</div>
                                 </td>
 
                                 <td align="center" width="33%">

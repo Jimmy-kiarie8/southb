@@ -41,7 +41,7 @@ Route::group(['middleware' => 'auth'], function () {
         }
         // use Barryvdh\DomPDF\Facade\Pdf;
 
-        $pdf = Pdf::loadView('sale::delivery', [
+        $pdf = Pdf::loadView('sale::print', [
             'sale' => $sale,
             'customer' => $customer,
         ])->setPaper('a4');

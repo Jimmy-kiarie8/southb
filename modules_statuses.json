@@ -17,5 +17,6 @@
     "Invoice": true,
     "Stocksheet": true,
     "Branch": true,
-    "Transfer": true
+    "Transfer": true,
+    "GoodIssue": true
 }

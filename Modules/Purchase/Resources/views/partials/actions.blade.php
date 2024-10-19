@@ -8,6 +8,11 @@
                 <i class="bi bi-cash-coin mr-2 text-warning" style="line-height: 1;"></i> Show Payments
             </a>
         @endcan
+
+        <a href="{{ route('purchase-returns.create', ['purchase_id' => $data->id]) }}" class="dropdown-item">
+            <i class="bi bi-file-earmark-pdf mr-2 text-danger" style="line-height: 1;"></i> Return
+        </a>
+
         @can('access_purchase_payments')
             @if($data->due_amount > 0)
                 <a href="{{ route('purchase-payments.create', $data->id) }}" class="dropdown-item">

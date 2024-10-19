@@ -36,6 +36,13 @@
                </a>
            </li>
         @endcan
+        @can('print_barcodes')
+           <li class="c-sidebar-nav-item">
+               <a class="c-sidebar-nav-link {{ request()->routeIs('goodissue.index') ? 'c-active' : '' }}" href="{{ route('goodissue.index') }}">
+                   <i class="c-sidebar-nav-icon bi bi-printer" style="line-height: 1;"></i> Goods Issue
+               </a>
+           </li>
+        @endcan
     </ul>
 </li>
 @endcan

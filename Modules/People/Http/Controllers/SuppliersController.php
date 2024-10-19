@@ -34,6 +34,7 @@ class SuppliersController extends Controller
             'supplier_phone' => 'nullable|max:255',
             'supplier_email' => 'nullable|email|max:255',
             'city'           => 'nullable|string|max:255',
+            'pin'           => 'nullable|string|max:255',
             'country'        => 'nullable|string|max:255',
             'address'        => 'nullable|string|max:500',
         ]);
@@ -43,6 +44,7 @@ class SuppliersController extends Controller
             'supplier_phone' => $request->supplier_phone,
             'supplier_email' => $request->supplier_email,
             'city'           => $request->city,
+            'pin'           => $request->pin,
             'country'        => $request->country,
             'address'        => $request->address
         ]);

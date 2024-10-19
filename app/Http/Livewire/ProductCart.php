@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Livewire\Component;
 use Modules\Product\Entities\Product;
+use Modules\Purchase\Entities\Purchase;
+use Modules\Sale\Entities\Sale;
 
 class ProductCart extends Component
 {
@@ -26,12 +28,17 @@ class ProductCart extends Component
     public $cart_total;
     // public $sale_type;
     public $sale_type = [];
+    public $sale_id;
+    public $purchase_id;
 
 
-    public function mount($cartInstance, $data = null)
+    public function mount($cartInstance, $data = null, $sale_id = null, $purchase_id=null)
     {
         $this->cart_instance = $cartInstance;
         $this->cart_total = 0;
+        $this->sale_id = $sale_id;
+        $this->purchase_id = $purchase_id;
+
         // $this->sale_type = 'Wholesale';
         if ($data) {
             $this->data = $data;
@@ -65,6 +72,14 @@ class ProductCart extends Component
             $this->discount_type = [];
             $this->item_discount = [];
         }
+
+
+        if ($this->sale_id) {
+            $this->loadSaleItems();
+        }
+        if ($this->purchase_id) {
+            $this->loadPurchaseItems();
+        }
     }
 
     public function render()
@@ -75,6 +90,62 @@ class ProductCart extends Component
             'cart_items' => $cart_items
         ]);
     }
+
+
+    public function loadSaleItems()
+    {
+        if (!$this->sale_id) return;
+
+        $sale = Sale::findOrFail($this->sale_id);
+
+        foreach ($sale->saleDetails as $saleDetail) {
+            $product = Product::findOrFail($saleDetail->product_id);
+
+            $this->addProductToCart($product, $saleDetail->quantity, $saleDetail->price);
+        }
+    }
+
+    public function loadPurchaseItems()
+    {
+        if (!$this->purchase_id) return;
+
+        $purchase = Purchase::findOrFail($this->purchase_id);
+
+        foreach ($purchase->purchaseDetails as $purchaseDetail) {
+            $product = Product::findOrFail($purchaseDetail->product_id);
+
+            $this->addProductToCart($product, $purchaseDetail->quantity, $purchaseDetail->price);
+        }
+    }
+
+    private function addProductToCart($product, $quantity, $price)
+    {
+        $cart = Cart::instance($this->cart_instance);
+
+        $cart->add([
+            'id'      => $product->id,
+            'name'    => $product->product_name,
+            'qty'     => $quantity,
+            'price'   => $price,
+            'weight'  => 1,
+            'options' => [
+                'product_discount'      => 0.00,
+                'product_discount_type' => 'fixed',
+                'sub_total'             => $price * $quantity,
+                'code'                  => $product->product_code,
+                'stock'                 => $product->product_quantity,
+                'unit'                  => $product->product_unit,
+                'product_tax'           => $this->calculate($product)['product_tax'],
+                'unit_price'            => $price,
+            ]
+        ]);
+
+        $this->check_quantity[$product->id] = $product->product_quantity;
+        $this->quantity[$product->id] = $quantity;
+        $this->discount_type[$product->id] = 'fixed';
+        $this->item_discount[$product->id] = 0;
+    }
+
 
     public function productSelected($product)
     {
@@ -295,17 +366,17 @@ class ProductCart extends Component
         $wholesale_price = 0;
 
         if ($product['product_tax_type'] == 1) {
-            $price = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']));
+            $price = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']/100));
             $unit_price = $product['product_price'];
-            $product_tax = $product['product_price'] * ($product['product_order_tax']);
-            $sub_total = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']));
-            $wholesale_price = $product['wholesale_price'] + ($product['wholesale_price'] * ($product['product_order_tax']));
-            $cost_price = $product['product_cost'] + ($product['product_cost'] * ($product['product_order_tax']));
+            $product_tax = $product['product_price'] * ($product['product_order_tax']/100);
+            $sub_total = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']/100));
+            $wholesale_price = $product['wholesale_price'] + ($product['wholesale_price'] * ($product['product_order_tax']/100));
+            $cost_price = $product['product_cost'] + ($product['product_cost'] * ($product['product_order_tax']/100));
             $product_cost = $product['product_cost'];
         } elseif ($product['product_tax_type'] == 2) {
             $price = $product['product_price'];
-            $unit_price = $product['product_price'] - ($product['product_price'] * ($product['product_order_tax']));
-            $product_tax = $product['product_price'] * ($product['product_order_tax']);
+            $unit_price = $product['product_price'] - ($product['product_price'] * ($product['product_order_tax']/100));
+            $product_tax = $product['product_price'] * ($product['product_order_tax']/100);
             $sub_total = $product['product_price'];
             $wholesale_price = $product['wholesale_price'];
             $cost_price = $product['product_cost'];

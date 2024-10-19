@@ -41,19 +41,25 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="supplier_phone">Phone <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="supplier_phone" required value="{{ $supplier->supplier_phone }}">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="supplier_phone">Pin <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="pin" required value="{{ $supplier->pin }}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="city">City <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="city" required value="{{ $supplier->city }}">
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="country">Country <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="country" required value="{{ $supplier->country }}">
