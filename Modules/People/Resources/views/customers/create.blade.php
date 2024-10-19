@@ -54,8 +54,14 @@
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <label for="country">Country</label>
+                                        <label for="country">PIN</label>
                                         <input type="text" class="form-control" name="country">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="pin">PIN</label>
+                                        <input type="text" class="form-control" name="pin">
                                     </div>
                                 </div>
                             </div>

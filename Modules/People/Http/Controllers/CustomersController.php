@@ -35,6 +35,7 @@ class CustomersController extends Controller
             'customer_email' => 'nullable|email|max:255',
             'city'           => 'nullable|string|max:255',
             'country'        => 'nullable|string|max:255',
+            'pin'        => 'nullable|string|max:255',
             'address'        => 'nullable|string|max:500',
         ]);
 
@@ -44,6 +45,7 @@ class CustomersController extends Controller
             'customer_email' => $request->customer_email,
             'city'           => $request->city,
             'country'        => $request->country,
+            'pin'        => $request->pin,
             'address'        => $request->address
         ]);
 
