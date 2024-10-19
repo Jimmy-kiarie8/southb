@@ -118,6 +118,7 @@ class ProductCart extends Component
                 'product_discount_type' => 'fixed',
                 'sub_total'             => $this->calculate($product)['sub_total'],
                 'code'                  => $product['product_code'],
+                'moq'                  => $product['moq'],
                 'stock'                 => $product['product_quantity'],
                 'unit'                  => $product['product_unit'],
                 'product_tax'           => $this->calculate($product)['product_tax'],
@@ -150,12 +151,17 @@ class ProductCart extends Component
 
     public function updateQuantity($row_id, $product_id)
     {
+        $product = Product::select('id', 'moq', 'product_name')->find($product_id);
         if ($this->cart_instance == 'sale' || $this->cart_instance == 'purchase_return') {
-            if ($this->check_quantity[$product_id] < $this->quantity[$product_id]) {
-                // session()->flash('message', 'The requested quantity is not available in stock.');
-                // return;
+            if ($product->moq) {
+                if ((int)$product->moq > $this->quantity[$product_id]) {
+                    Log::alert("Bellow");
+                    session()->flash('message', $product->product_name . ' is below MOQ!');
+                    // return;
+                }
             }
         }
+
 
         Cart::instance($this->cart_instance)->update($row_id, $this->quantity[$product_id]);
 
@@ -238,7 +244,7 @@ class ProductCart extends Component
                 'product_discount_type' => $cart_item->options->product_discount_type,
             ]
         ]);
-    // $this->recalculateSubtotal($row_id);
+        // $this->recalculateSubtotal($row_id);
 
     }
 

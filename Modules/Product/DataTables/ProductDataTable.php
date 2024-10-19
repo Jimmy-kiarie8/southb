@@ -102,6 +102,11 @@ class ProductDataTable extends DataTable
                 ->title('Quantity')
                 ->className('text-left align-middle'),
 
+                Column::computed('moq')
+                // Column::computed('branches[0].pivot.quantity')
+                    ->title('MOQ')
+                    ->className('text-left align-middle'),
+
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
