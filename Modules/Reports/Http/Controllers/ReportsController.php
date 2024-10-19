@@ -1,0 +1,96 @@
+<?php
+
+namespace Modules\Reports\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
+
+class ReportsController extends Controller
+{
+
+    public function profitLossReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::profit-loss.index');
+    }
+
+    public function paymentsReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::payments.index');
+    }
+
+    public function salesReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::sales.index');
+    }
+
+
+    public function adjustmentReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::adjustments.index');
+    }
+
+    public function purchasesReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::purchases.index');
+    }
+
+    public function salesReturnReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::sales-return.index');
+    }
+
+    public function purchasesReturnReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::purchases-return.index');
+    }
+
+    public function stockLevel()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::stock.index');
+    }
+
+    public function dailyReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::sales.daily');
+    }
+
+    public function productReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::products.index');
+    }
+
+    public function supplierReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::supplier.index');
+    }
+
+    public function customerReport()
+    {
+        abort_if(Gate::denies('access_reports'), 403);
+
+        return view('reports::client.index');
+    }
+}

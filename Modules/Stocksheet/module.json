@@ -1,0 +1,13 @@
+{
+    "name": "Stocksheet",
+    "alias": "stocksheet",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Stocksheet\\Providers\\StocksheetServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

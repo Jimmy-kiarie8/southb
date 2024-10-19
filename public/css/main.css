@@ -1,0 +1,6 @@
+.modal-backdrop{
+    display: none !important;
+}
+.modal-open .modal {
+    background: #00000078 !important;
+}
