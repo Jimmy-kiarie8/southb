@@ -52,12 +52,6 @@ class SaleController extends Controller
         }
 
         DB::transaction(function () use ($request) {
-            // $cash_paid_amount = $request->cash_paid_amount;
-            // $mpesa_paid_amount = $request->mpesa_paid_amount;
-            // $cheque_paid_amount = $request->cheque_paid_amount;
-            // $bank_paid_amount = $request->bank_paid_amount;
-            // $credit_paid_amount = $request->credit_paid_amount;
-
             // $paid_amount =  $cash_paid_amount + $bank_paid_amount + $mpesa_paid_amount + $cheque_paid_amount;
             // $due_amount = $request->total_amount - $paid_amount;
             $location_id = ($request->location_id) ? $request->location_id : Auth::user()->branch_id;
@@ -71,21 +65,6 @@ class SaleController extends Controller
             }
             $due_amount = $total_amount - $paid_amount;
 
-            // dd($total_amount);
-
-            // if ($paid_amount > $request->total_amount) {
-            //     $paid_amount = $request->total_amount;
-            //     $due_amount = 0;
-            // }
-
-            // elseif ($paid_amount == 0) {
-            //     $paid_amount = $request->total_amount;
-            // }
-
-            // if($credit_paid_amount == $request->total_amount)
-            // {
-            //     $paid_amount = 0;
-            // }
 
             $payment_status = '';
             if ($request->payment_method === 'Credit' || $paid_amount == 0) {
