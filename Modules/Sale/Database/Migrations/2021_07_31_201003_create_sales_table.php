@@ -30,6 +30,7 @@ class CreateSalesTable extends Migration
             $table->integer('total_amount');
             $table->integer('paid_amount');
             $table->integer('due_amount');
+            $table->integer('cu_inv_no')->nullable();
             $table->integer('change_amount')->default(0);
             $table->string('status');
             $table->string('payment_status');

@@ -106,13 +106,13 @@ class SaleController extends Controller
                 }
             }
 
-
             $sale = Sale::create([
                 'date' => $request->date,
                 'customer_id' => $customer_id,
                 'branch_id' => $location_id,
                 'clientcode' => $customer_code,
                 'customer_name' => $customer_name,
+                'cu_inv_no' => $request->cu_inv_no,
                 'tax_percentage' => $request->tax_percentage,
                 'discount_percentage' => $request->discount_percentage,
                 'shipping_amount' => $request->shipping_amount,

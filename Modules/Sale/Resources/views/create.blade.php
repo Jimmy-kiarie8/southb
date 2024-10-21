@@ -116,6 +116,12 @@
                                         id="">
                                 </div>
 
+                                <div class="col-lg-4">
+                                    <label for="total_amount">CU Invoice Number</label>
+                                    <input type="number" name="cu_inv_no" class="form-control" value="0"
+                                        id="">
+                                </div>
+
                                 {{--
                                 <div class="col-lg-12">
                                     <div id="error-message" class="alert alert-danger" role="alert"></div>

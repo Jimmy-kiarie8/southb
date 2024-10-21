@@ -94,6 +94,9 @@ class SalesDataTable extends DataTable
             Column::computed('payment_status')
                 ->className('text-left align-middle'),
 
+            Column::computed('cu_inv_no')
+            ->className('text-left align-middle'),
+
 
             Column::computed('action')
                 ->exportable(false)

@@ -41,21 +41,23 @@ class SalesReturnController extends Controller
 
         return view('salesreturn::create', compact('sale_id', 'sale'));
     }
-
     public function store(StoreSaleReturnRequest $request)
     {
         DB::transaction(function () use ($request) {
+            $due_amount = $request->total_amount - $request->paid_amount;
             $location_id = $request->location_id ?? Auth::user()->branch_id;
-            $customer = Customer::findOrFail($request->customer_id);
+
+            $payment_status = $this->determinePaymentStatus($due_amount, $request->total_amount);
+
+            $sale_return = $this->createSaleReturn($request, $due_amount, $payment_status);
+
+            $this->processSaleReturnItems($sale_return, $request->status, $location_id, $request->sale_id);
+
+            $this->handleSaleReturnPayment($sale_return, $request);
+
+            $this->updateOriginalSale($request->sale_id, $sale_return);
             $sale = Sale::findOrFail($request->sale_id);
-
-            $saleReturn = $this->createSaleReturn($request, $customer, $sale);
-
-            $this->processSaleReturnItems($saleReturn, $request, $location_id);
-
-            $this->updateSaleStatus($sale);
-
-            $this->createSaleReturnPayment($saleReturn, $request);
+            $this->recalculateSaleTotals($sale);
 
             Cart::instance('sale_return')->destroy();
         });
@@ -64,98 +66,180 @@ class SalesReturnController extends Controller
         return redirect()->route('sale-returns.index');
     }
 
-    private function createSaleReturn($request, $customer, $sale)
-    {
-        $dueAmount = $request->total_amount - $request->paid_amount;
-        $paymentStatus = $this->determinePaymentStatus($dueAmount, $request->total_amount);
+    // ... (other methods remain the same)
 
-        return SaleReturn::create([
-            'date' => $request->date,
-            'customer_id' => $customer->id,
-            'customer_name' => $customer->customer_name,
-            'tax_percentage' => $request->tax_percentage,
-            'discount_percentage' => $request->discount_percentage,
-            'shipping_amount' => $request->shipping_amount,
-            'paid_amount' => $request->paid_amount,
-            'total_amount' => $request->total_amount,
-            'due_amount' => $dueAmount,
-            'status' => $request->status,
-            'payment_status' => $paymentStatus,
-            'payment_method' => $request->payment_method,
-            'note' => $request->note,
-            'tax_amount' => Cart::instance('sale_return')->tax(),
-            'discount_amount' => Cart::instance('sale_return')->discount(),
-            'sale_id' => $sale->id,
+    private function processSaleReturnItems($sale_return, $status, $location_id, $sale_id)
+    {
+        $sale = Sale::findOrFail($sale_id);
+
+        foreach (Cart::instance('sale_return')->content() as $cart_item) {
+            $this->createSaleReturnDetail($sale_return, $cart_item);
+
+            if ($status == 'Completed') {
+                $this->updateStock($cart_item->id, $cart_item->qty, $location_id, 'add');
+                $this->updateSaleDetail($sale, $cart_item);
+            }
+        }
+    }
+
+    private function updateSaleDetail($sale, $cart_item)
+    {
+        $sale_detail = $sale->saleDetails()
+            ->where('product_id', $cart_item->id)
+            ->first();
+
+        if ($sale_detail) {
+            $new_quantity = max(0, $sale_detail->quantity - $cart_item->qty);
+            $new_sub_total = $new_quantity * $sale_detail->price;
+
+            $sale_detail->update([
+                'quantity' => $new_quantity,
+                'sub_total' => $new_sub_total,
+            ]);
+
+            if ($new_quantity == 0) {
+                $sale_detail->delete();
+            }
+        }
+    }
+
+    private function recalculateSaleTotals($sale)
+    {
+        $total_amount = $sale->saleDetails->sum('sub_total');
+        $tax_amount = $total_amount * ($sale->tax_percentage / 100);
+        $discount_amount = $total_amount * ($sale->discount_percentage / 100);
+        $shipping_amount = $sale->shipping_amount;
+        $new_status = $sale->saleDetails->isEmpty() ? 'Returned' : 'Partial Return';
+
+        $sale->update([
+            'total_amount' => $total_amount + $tax_amount - $discount_amount + $shipping_amount,
+            'tax_amount' => $tax_amount,
+            'status' => $new_status,
+            'discount_amount' => $discount_amount,
+            'due_amount' => max(0, $sale->total_amount - $sale->paid_amount),
         ]);
     }
 
-    private function determinePaymentStatus($dueAmount, $totalAmount)
+    private function updateOriginalSale($sale_id, $sale_return)
     {
-        if ($dueAmount == $totalAmount) {
+        $sale = Sale::findOrFail($sale_id);
+
+        $new_status = $sale->saleDetails->isEmpty() ? 'Returned' : 'Partial Return';
+
+        $sale->update([
+            'status' => $new_status,
+            'total_amount' => $sale->total_amount - $sale_return->total_amount,
+            'paid_amount' => $sale->paid_amount - $sale_return->paid_amount,
+            'due_amount' => max(0, $sale->due_amount - $sale_return->total_amount),
+        ]);
+
+        $this->updateSalePaymentStatus($sale);
+    }
+
+    private function updateSalePaymentStatus($sale)
+    {
+        if ($sale->due_amount <= 0) {
+            $sale->payment_status = 'Paid';
+        } elseif ($sale->due_amount < $sale->total_amount) {
+            $sale->payment_status = 'Partial';
+        } else {
+            $sale->payment_status = 'Unpaid';
+        }
+        $sale->save();
+    }
+
+    private function determinePaymentStatus($due_amount, $total_amount)
+    {
+        if ($due_amount == $total_amount) {
             return 'Unpaid';
-        } elseif ($dueAmount > 0) {
+        } elseif ($due_amount > 0) {
             return 'Partial';
         } else {
             return 'Paid';
         }
     }
 
-    private function processSaleReturnItems($saleReturn, $request, $locationId)
+    private function createSaleReturn($request, $due_amount, $payment_status)
     {
-        foreach (Cart::instance('sale_return')->content() as $cartItem) {
-            $this->createSaleReturnDetail($saleReturn, $cartItem);
-
-            if ($request->status == 'Completed') {
-                $this->updateProductStock($cartItem, $locationId);
-            }
-        }
-    }
-
-    private function createSaleReturnDetail($saleReturn, $cartItem)
-    {
-        SaleReturnDetail::create([
-            'sale_return_id' => $saleReturn->id,
-            'product_id' => $cartItem->id,
-            'product_name' => $cartItem->name,
-            'product_code' => $cartItem->options->code,
-            'quantity' => $cartItem->qty,
-            'price' => $cartItem->price,
-            'unit_price' => $cartItem->options->unit_price,
-            'sub_total' => $cartItem->options->sub_total,
-            'product_discount_amount' => $cartItem->options->product_discount,
-            'product_discount_type' => $cartItem->options->product_discount_type,
-            'product_tax_amount' => $cartItem->options->product_tax,
+        return SaleReturn::create([
+            'date' => $request->date,
+            'customer_id' => $request->customer_id,
+            'customer_name' => Customer::findOrFail($request->customer_id)->customer_name,
+            'tax_percentage' => $request->tax_percentage,
+            'discount_percentage' => $request->discount_percentage,
+            'shipping_amount' => $request->shipping_amount,
+            'paid_amount' => $request->paid_amount,
+            'total_amount' => $request->total_amount,
+            'due_amount' => $due_amount,
+            'status' => $request->status,
+            'payment_status' => $payment_status,
+            'payment_method' => $request->payment_method,
+            'note' => $request->note,
+            'tax_amount' => Cart::instance('sale_return')->tax(),
+            'discount_amount' => Cart::instance('sale_return')->discount(),
+            'sale_id' => $request->sale_id,
         ]);
     }
 
-    private function updateProductStock($cartItem, $locationId)
-    {
-        $product = Product::findOrFail($cartItem->id);
-        $product->increment('product_quantity', $cartItem->qty);
 
-        $productBranch = ProductBranch::firstOrCreate(
-            ['product_id' => $cartItem->id, 'branch_id' => $locationId],
-            ['quantity' => 0]
-        );
-        $productBranch->increment('quantity', $cartItem->qty);
+    private function createSaleReturnDetail($sale_return, $cart_item)
+    {
+        SaleReturnDetail::create([
+            'sale_return_id' => $sale_return->id,
+            'product_id' => $cart_item->id,
+            'product_name' => $cart_item->name,
+            'product_code' => $cart_item->options->code,
+            'quantity' => $cart_item->qty,
+            'price' => $cart_item->price,
+            'unit_price' => $cart_item->options->unit_price,
+            'sub_total' => $cart_item->options->sub_total,
+            'product_discount_amount' => $cart_item->options->product_discount,
+            'product_discount_type' => $cart_item->options->product_discount_type,
+            'product_tax_amount' => $cart_item->options->product_tax,
+        ]);
     }
 
-    private function updateSaleStatus($sale)
+    private function updateStock($product_id, $quantity, $location_id, $operation = 'add')
     {
-        $sale->update(['status' => 'Returned']);
+        $product = Product::findOrFail($product_id);
+        $product_branch = ProductBranch::where('product_id', $product_id)
+            ->where('branch_id', $location_id)
+            ->first();
+
+        if ($operation === 'add') {
+            $product->product_quantity += $quantity;
+            if ($product_branch) {
+                $product_branch->quantity += $quantity;
+            }
+        } else {
+            $product->product_quantity -= $quantity;
+            if ($product_branch) {
+                $product_branch->quantity -= $quantity;
+            }
+        }
+
+        $product->save();
+        if ($product_branch) {
+            $product_branch->save();
+        }
     }
 
-    private function createSaleReturnPayment($saleReturn, $request)
+    private function handleSaleReturnPayment($sale_return, $request)
     {
-        if ($saleReturn->paid_amount > 0) {
+        if ($sale_return->paid_amount > 0) {
             SaleReturnPayment::create([
                 'date' => $request->date,
-                'reference' => 'INV/' . $saleReturn->reference,
-                'amount' => $saleReturn->paid_amount,
-                'sale_return_id' => $saleReturn->id,
+                'reference' => 'INV/' . $sale_return->reference,
+                'amount' => $sale_return->paid_amount,
+                'sale_return_id' => $sale_return->id,
                 'payment_method' => $request->payment_method
             ]);
         }
+    }
+
+    private function updateOriginalSaleStatus($sale_id)
+    {
+        Sale::find($sale_id)->update(['status' => 'Returned']);
     }
 
     public function store1(StoreSaleReturnRequest $request)
