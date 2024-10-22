@@ -335,74 +335,91 @@ class ProductCart extends Component
     {
         $cart_item = Cart::instance($this->cart_instance)->get($row_id);
 
-        $product_discount = $this->item_discount[$product_id];
-        $discount_type = $this->discount_type[$product_id];
+        if ($this->discount_type[$product_id] == 'fixed') {
+            Cart::instance($this->cart_instance)
+                ->update($row_id, [
+                    'price' => ($cart_item->price + $cart_item->options->product_discount) - $this->item_discount[$product_id]
+                ]);
 
-        if ($discount_type === 'fixed') {
-            $discount_amount = $product_discount;
-        } elseif ($discount_type === 'percentage') {
-            $discount_amount = ($cart_item->price * $product_discount) / 100;
-        } else {
-            $discount_amount = 0;
+            $discount_amount = $this->item_discount[$product_id];
+
+            $this->updateCartOptions($row_id, $product_id, $cart_item, $discount_amount);
+        } elseif ($this->discount_type[$product_id] == 'percentage') {
+            $discount_amount = ($cart_item->price + $cart_item->options->product_discount) * ($this->item_discount[$product_id]);
+
+            Cart::instance($this->cart_instance)
+                ->update($row_id, [
+                    'price' => ($cart_item->price + $cart_item->options->product_discount) - $discount_amount
+                ]);
+
+            $this->updateCartOptions($row_id, $product_id, $cart_item, $discount_amount);
         }
 
-        $sub_total = ($cart_item->price - $discount_amount) * $cart_item->qty;
-
-        Cart::instance($this->cart_instance)->update($row_id, [
-            'options' => [
-                'product_discount' => $product_discount,
-                'product_discount_type' => $discount_type,
-                'sub_total' => $sub_total,
-            ]
-        ]);
-
-        // Recalculate cart total after applying the discount
-        $cart_total = 0;
-        $cart_items = Cart::instance($this->cart_instance)->content();
-
-        foreach ($cart_items as $item) {
-            $cart_total += $item->options->sub_total;
-        }
-
-        $this->cart_total = $cart_total;
+        session()->flash('discount_message' . $product_id, 'Discount added to the product!');
     }
 
-    public function calculate($product)
-    {
-        $price = 0;
-        $unit_price = 0;
-        $product_tax = 0;
-        $sub_total = 0;
-        $wholesale_price = 0;
 
-        if ($product['product_tax_type'] == 1) {
-            $price = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']/100));
-            $unit_price = $product['product_price'];
-            $product_tax = $product['product_price'] * ($product['product_order_tax']/100);
-            $sub_total = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']/100));
-            $wholesale_price = $product['wholesale_price'] + ($product['wholesale_price'] * ($product['product_order_tax']/100));
-            $cost_price = $product['product_cost'] + ($product['product_cost'] * ($product['product_order_tax']/100));
-            $product_cost = $product['product_cost'];
-        } elseif ($product['product_tax_type'] == 2) {
-            $price = $product['product_price'];
-            $unit_price = $product['product_price'] - ($product['product_price'] * ($product['product_order_tax']/100));
-            $product_tax = $product['product_price'] * ($product['product_order_tax']/100);
-            $sub_total = $product['product_price'];
-            $wholesale_price = $product['wholesale_price'];
-            $cost_price = $product['product_cost'];
-            $product_cost = $product['product_cost'];
-        } else {
-            $price = $product['product_price'];
-            $unit_price = $product['product_price'];
-            $product_cost = $product['product_cost'];
-            $product_tax = 0.00;
-            $sub_total = $product['product_price'];
-            $wholesale_price = $product['wholesale_price'];
-            $cost_price = $product['product_cost'];
-        }
 
-        return ['price' => $price, 'wholesale_price' => $wholesale_price, 'unit_price' => $unit_price, 'product_tax' => $product_tax, 'sub_total' => $sub_total, 'product_cost' => $product_cost, 'cost_price' => $cost_price];
+// Add this new method to calculate product tax
+private function calculateProductTax($product, $quantity)
+{
+    if ($product->product_tax_type == 1) {
+        // Exclusive tax
+        return ($product->product_price * $quantity) * ($product->product_order_tax / 100);
+    } elseif ($product->product_tax_type == 2) {
+        // Inclusive tax
+        return ($product->product_price * $quantity) * ($product->product_order_tax / 100);
     }
+
+    return 0.00;
+}
+
+// Update the calculate method to consider quantity
+public function calculate($product)
+{
+    $price = 0;
+    $unit_price = 0;
+    $product_tax = 0;
+    $sub_total = 0;
+    $wholesale_price = 0;
+    $quantity = 1; // Default quantity for initial calculation
+
+    if ($product['product_tax_type'] == 1) {
+        $product_tax = ($product['product_price'] * $quantity) * ($product['product_order_tax']/100);
+        $price = $product['product_price'] + ($product_tax / $quantity);
+        $unit_price = $product['product_price'];
+        $sub_total = ($product['product_price'] * $quantity) + $product_tax;
+        $wholesale_price = $product['wholesale_price'] + ($product['wholesale_price'] * ($product['product_order_tax']/100));
+        $cost_price = $product['product_cost'] + ($product['product_cost'] * ($product['product_order_tax']/100));
+        $product_cost = $product['product_cost'];
+    } elseif ($product['product_tax_type'] == 2) {
+        $product_tax = ($product['product_price'] * $quantity) * ($product['product_order_tax']/100);
+        $price = $product['product_price'];
+        $unit_price = $product['product_price'] - ($product_tax / $quantity);
+        $sub_total = $product['product_price'] * $quantity;
+        $wholesale_price = $product['wholesale_price'];
+        $cost_price = $product['product_cost'];
+        $product_cost = $product['product_cost'];
+    } else {
+        $price = $product['product_price'];
+        $unit_price = $product['product_price'];
+        $product_cost = $product['product_cost'];
+        $product_tax = 0.00;
+        $sub_total = $product['product_price'] * $quantity;
+        $wholesale_price = $product['wholesale_price'];
+        $cost_price = $product['product_cost'];
+    }
+
+    return [
+        'price' => $price,
+        'wholesale_price' => $wholesale_price,
+        'unit_price' => $unit_price,
+        'product_tax' => $product_tax,
+        'sub_total' => $sub_total,
+        'product_cost' => $product_cost,
+        'cost_price' => $cost_price
+    ];
+}
 
     public function updateCartOptions($row_id, $product_id, $cart_item, $discount_amount)
     {
