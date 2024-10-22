@@ -44,7 +44,7 @@
                                     <div>{{ $customer->address }}</div>
                                     {{-- <div>Email: {{ $customer->customer_email }}</div>
                                     <div>Phone: {{ $customer->customer_phone }}</div> --}}
-                                    <div>Phone: {{ $customer->pin }}</div>
+                                    <div>Pin: {{ $customer->pin }}</div>
                                 </td>
 
                                 <td align="right" width="33%">
