@@ -70,7 +70,7 @@
                                         {{-- @if (env('TAX_APPLY'))
                                             <th>Tax</th>
                                         @endif --}}
-                                        <th>Sub Total</th>
+                                        <th>Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
