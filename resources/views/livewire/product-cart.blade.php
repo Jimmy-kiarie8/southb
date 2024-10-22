@@ -140,7 +140,7 @@
                 <table class="table table-striped">
                     <tr>
                         <th>VAT ({{ $global_tax }}%)</th>
-                        <td>(+) {{ format_currency(Cart::instance($cart_instance)->total() / 1.16) }}</td>
+                        <td>(+) {{ format_currency(Cart::instance($cart_instance)->total() - Cart::instance($cart_instance)->total() / 1.16) }}</td>
                         {{-- <td>(+) {{ format_currency(Cart::instance($cart_instance)->tax()) }}</td> --}}
                     </tr>
                     <tr>
