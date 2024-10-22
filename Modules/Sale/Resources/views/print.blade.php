@@ -96,8 +96,8 @@
                                 <table class="table">
                                     <tbody>
                                         <tr>
-                                            <td align="left"><strong>Discount
-                                                    ({{ $sale->discount_percentage }}%)</strong></td>
+                                            <td align="left"><strong>Net Total
+                                                    ({{ $sale->total_amount - $sale->tax_amount }}%)</strong></td>
                                             <td align="right">{{ format_currency($sale->discount_amount) }}</td>
                                         </tr>
 
