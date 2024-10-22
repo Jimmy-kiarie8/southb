@@ -140,7 +140,8 @@
                 <table class="table table-striped">
                     <tr>
                         <th>Order Tax ({{ $global_tax }}%)</th>
-                        <td>(+) {{ format_currency(Cart::instance($cart_instance)->tax()) }}</td>
+                        <td>(+) {{ format_currency(Cart::instance($cart_instance)->total() * 0.16) }}</td>
+                        {{-- <td>(+) {{ format_currency(Cart::instance($cart_instance)->tax()) }}</td> --}}
                     </tr>
                     <tr>
                         <th>Discount ({{ $global_discount }}%)</th>
@@ -154,7 +155,7 @@
 
                     @if ($cart_instance != 'purchase')
                         <tr id="total_amount">
-                            <th>Grand Total 1</th>
+                            <th>Grand Total</th>
                             @php
                                 $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
                             @endphp
@@ -164,7 +165,7 @@
                         </tr>
                     @else
                         <tr id="total_amount">
-                            <th>Grand Total 2</th>
+                            <th>Grand Total</th>
 
                             @php
                                 $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
