@@ -67,9 +67,9 @@
                                         <th>Net Unit Price</th>
                                         <th>Quantity</th>
                                         <th>Discount</th>
-                                        @if (env('TAX_APPLY'))
+                                        {{-- @if (env('TAX_APPLY'))
                                             <th>Tax</th>
-                                        @endif
+                                        @endif --}}
                                         <th>Sub Total</th>
                                     </tr>
                                 </thead>
@@ -81,9 +81,9 @@
                                             <td>{{ format_currency($item->unit_price) }}</td>
                                             <td>{{ $item->quantity }}</td>
                                             <td>{{ format_currency($item->product_discount_amount) }}</td>
-                                            @if (env('TAX_APPLY'))
+                                            {{-- @if (env('TAX_APPLY'))
                                                 <td>{{ format_currency($item->product_tax_amount) }}</td>
-                                            @endif
+                                            @endif --}}
                                             <td>{{ format_currency($item->sub_total) }}</td>
                                         </tr>
                                     @endforeach
