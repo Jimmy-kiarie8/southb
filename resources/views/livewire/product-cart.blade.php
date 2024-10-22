@@ -1,4 +1,3 @@
-
 <div>
     <div>
         @if (session()->has('message'))
@@ -30,7 +29,7 @@
                         <th class="align-middle">Net Unit Price</th>
                         @if (env('WHOLESALE_RETAIL'))
                             <th class="align-middle">Wholesale Price</th>
-                        <th class="align-middle">Sale Type</th>
+                            <th class="align-middle">Sale Type</th>
                         @endif
                         <th class="align-middle">Edit Price</th>
                         <th class="align-middle">Stock</th>
@@ -64,24 +63,21 @@
 
 
                                 @if (env('WHOLESALE_RETAIL'))
-                                    <td class="align-middle">{{ format_currency($cart_item->options->wholesale_price) }}</td>
+                                    <td class="align-middle">{{ format_currency($cart_item->options->wholesale_price) }}
+                                    </td>
                                     <td class="align-middle">
                                         <div class="form-check">
-                                            <input class="form-check-input"
-                                                   type="radio"
-                                                   name="saleType[{{ $cart_item->id }}]"
-                                                   wire:model="sale_type.{{ $cart_item->id }}"
-                                                   value="Retail"
-                                                   wire:change="updateSaleType('{{ $cart_item->rowId }}', 'Retail')">
+                                            <input class="form-check-input" type="radio"
+                                                name="saleType[{{ $cart_item->id }}]"
+                                                wire:model="sale_type.{{ $cart_item->id }}" value="Retail"
+                                                wire:change="updateSaleType('{{ $cart_item->rowId }}', 'Retail')">
                                             <label class="form-check-label">Retail</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input"
-                                                   type="radio"
-                                                   name="saleType[{{ $cart_item->id }}]"
-                                                   wire:model="sale_type.{{ $cart_item->id }}"
-                                                   value="Wholesale"
-                                                   wire:change="updateSaleType('{{ $cart_item->rowId }}', 'Wholesale')">
+                                            <input class="form-check-input" type="radio"
+                                                name="saleType[{{ $cart_item->id }}]"
+                                                wire:model="sale_type.{{ $cart_item->id }}" value="Wholesale"
+                                                wire:change="updateSaleType('{{ $cart_item->rowId }}', 'Wholesale')">
                                             <label class="form-check-label">Wholesale</label>
                                         </div>
                                     </td>
@@ -138,9 +134,43 @@
         <div class="col-md-4">
             <div class="table-responsive">
                 <table class="table table-striped">
+
+                    @if ($cart_instance != 'purchase')
+                        <tr id="total_amount">
+                            <th>Net Total</th>
+                            @php
+                                $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
+                                $tax =
+                                    Cart::instance($cart_instance)->total() -
+                                    Cart::instance($cart_instance)->total() / 1.16;
+                                $total = $total_with_shipping - $tax;
+                            @endphp
+                            <th>
+                                (=) {{ format_currency($total) }}
+                            </th>
+                        </tr>
+                    @else
+                        <tr id="total_amount">
+                            <th>Net Total</th>
+                            @php
+                                $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
+                                $tax =
+                                    Cart::instance($cart_instance)->total() -
+                                    Cart::instance($cart_instance)->total() / 1.16;
+                                $total = $total_with_shipping - $tax;
+                            @endphp
+                            <th>
+                                (=) {{ format_currency($total) }}
+                            </th>
+                        </tr>
+                    @endif
+
+
                     <tr>
                         <th>VAT ({{ $global_tax }}%)</th>
-                        <td>(+) {{ format_currency(Cart::instance($cart_instance)->total() - Cart::instance($cart_instance)->total() / 1.16) }}</td>
+                        <td>(+)
+                            {{ format_currency(Cart::instance($cart_instance)->total() - Cart::instance($cart_instance)->total() / 1.16) }}
+                        </td>
                         {{-- <td>(+) {{ format_currency(Cart::instance($cart_instance)->tax()) }}</td> --}}
                     </tr>
                     <tr>
