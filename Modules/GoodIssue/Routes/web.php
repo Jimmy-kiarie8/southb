@@ -16,4 +16,30 @@ Route::prefix('goodissue')->group(function() {
     Route::get('/create', 'GoodIssueController@create')->name('goodissue.create');
     Route::post('/', 'GoodIssueController@store')->name('goodissue.store');
     // Route::resource('/', 'GoodIssueController')->name("goodissue");
+
+
+
+    //Generate PDF
+    Route::get('/sales/pdf/{id}', function ($id) {
+        $sale = \Modules\Sale\Entities\Sale::find($id);
+
+        if (!$sale) {
+            $sale = \Modules\Sale\Entities\Sale::with('saleDetails')->where('reference', $id)->firstOrFail();
+        }
+        // $customer = \Modules\People\Entities\Customer::findOrFail($sale->customer_id);
+        $customer = \Modules\People\Entities\Customer::find($sale->customer_id);
+
+        if (!$customer) {
+            $customer = \Modules\People\Entities\Customer::where('customer_name', $sale->customer_name)->first();
+        }
+        // use Barryvdh\DomPDF\Facade\Pdf;
+
+        $pdf = Pdf::loadView('sale::print', [
+            'sale' => $sale,
+            'customer' => $customer,
+        ])->setPaper('a4');
+
+        return $pdf->stream('sale-' . $sale->reference . '.pdf');
+    })->name('goodissue.pdf');
+
 });

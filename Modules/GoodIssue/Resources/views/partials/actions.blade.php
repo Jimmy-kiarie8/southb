@@ -2,12 +2,12 @@
     <button type="button" class="btn btn-ghost-primary dropdown rounded" data-toggle="dropdown" aria-expanded="false">
         <i class="bi bi-three-dots-vertical"></i>
     </button>
-    {{-- <div class="dropdown-menu">
-        <a target="_blank" href="{{ route('sales.pos.pdf', $data->id) }}" class="dropdown-item">
-            <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> POS Invoice
+    <div class="dropdown-menu">
+        <a target="_blank" href="{{ route('goodissue.pdf', $data->id) }}" class="dropdown-item">
+            <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> Invoice
         </a>
 
-        <a target="_blank" href="{{ route('sales.delivery', $data->id) }}" class="dropdown-item">
+      {{--   <a target="_blank" href="{{ route('sales.delivery', $data->id) }}" class="dropdown-item">
             <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> Delivery Note
         </a>
 
