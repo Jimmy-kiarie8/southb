@@ -66,7 +66,7 @@ class Sale extends Model
         static::creating(function ($model) {
             DB::transaction(function() use ($model) {
                 $number = DB::table('sales')->lockForUpdate()->max('id') + 1;
-                $model->reference = make_reference_id('SL', $number);
+                $model->reference = make_reference_id('INVOICE', $number);
                 $model->user_id = Auth::id();
             });
         });
