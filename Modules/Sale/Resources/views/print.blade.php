@@ -137,7 +137,8 @@
         <hr>
         <br>
 
-        <div style="float: right">
+        <div>
+            <div style="float: right">
             <h2>Terms & Conditions</h2>
             <ul>
                 <li>Pricing are subject to 16% VAT</li>
@@ -147,6 +148,7 @@
                 <li>Payment cash on collection or delivery</li>
                 <li>Prices are subject to change without prior notice.</li>
             </ul>
+            </div>
             <br>
 
             <strong>CU Invoice Number: {{ $sale->cu_inv_no }}</strong>
