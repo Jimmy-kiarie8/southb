@@ -108,12 +108,36 @@
                                         </select>
                                     </div>
                                 </div>
+
+
+
+                                <!-- New Checkbox for Input in Dollars -->
+                                <div class="col-lg-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="is_dollars" name="is_dollars">
+                                        <label class="form-check-label" for="is_dollars">Input in Dollars?</label>
+                                    </div>
+                                </div>
+
+                                <!-- New Input for Conversion Rate -->
+                                <div class="col-lg-4" id="conversion-rate-field" style="display:none;">
+                                    <div class="form-group">
+                                        <label for="conversion_rate">Conversion Rate (1 USD = ?)</label>
+                                        <input type="text" class="form-control" id="conversion_rate"
+                                            name="conversion_rate" placeholder="e.g., 110" value="1">
+                                    </div>
+                                </div>
+
+
+
+
                                 <div class="col-lg-4">
                                     <div class="from-group">
                                         <div class="form-group">
                                             <label for="payment_method">Payment Method <span
                                                     class="text-danger">*</span></label>
-                                            <select class="form-control" name="payment_method" id="payment_method" required>
+                                            <select class="form-control" name="payment_method" id="payment_method"
+                                                required>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Credit Card">Credit Card</option>
                                                 <option value="Bank Transfer">Bank Transfer</option>
@@ -124,7 +148,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4">
+                                {{-- <div class="col-lg-4">
                                     <div class="form-group">
                                         <label for="paid_amount">Amount Paid <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -137,7 +161,26 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
+
+
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="paid_amount">Amount Paid <span
+                                                    class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input id="paid_amount" type="text" class="form-control"
+                                                    name="paid_amount" value="0" required>
+                                                <div class="input-group-append">
+                                                    <button id="getTotalAmount" class="btn btn-primary" type="button">
+                                                        <i class="bi bi-check-square"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
                             </div>
 
                             <div class="form-group">
@@ -189,6 +232,46 @@
             } else {
                 supplierSelect.style.display = "block";
             }
+        });
+
+
+
+        $(document).ready(function() {
+            // Initialize maskMoney for currency input
+            $('#paid_amount').maskMoney({
+                prefix: '{{ settings()->currency->symbol }}',
+                thousands: '{{ settings()->currency->thousand_separator }}',
+                decimal: '{{ settings()->currency->decimal_separator }}',
+                allowZero: true,
+            });
+
+            // Event listener for "Get Total Amount" button
+            $('#getTotalAmount').click(function() {
+                $('#paid_amount').maskMoney('mask', {{ Cart::instance('purchase')->total() }});
+            });
+
+            // Handle form submission
+            $('#purchase-form').submit(function() {
+                var paid_amount = $('#paid_amount').maskMoney('unmasked')[0];
+
+                // If the checkbox for dollars is checked, convert the amount
+                if ($('#is_dollars').is(':checked')) {
+                    var conversion_rate = parseFloat($('#conversion_rate').val());
+                    paid_amount = paid_amount * conversion_rate;
+                }
+
+                // Update the paid amount value with the converted amount
+                $('#paid_amount').val(paid_amount);
+            });
+
+            // Toggle visibility of the conversion rate input
+            $('#is_dollars').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#conversion-rate-field').show();
+                } else {
+                    $('#conversion-rate-field').hide();
+                }
+            });
         });
     </script>
 @endpush

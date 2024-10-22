@@ -173,7 +173,7 @@
                         </td>
                         {{-- <td>(+) {{ format_currency(Cart::instance($cart_instance)->tax()) }}</td> --}}
                     </tr>
-                    <tr>
+                    {{-- <tr>
                         <th>Discount ({{ $global_discount }}%)</th>
                         <td>(-) {{ format_currency(Cart::instance($cart_instance)->discount()) }}</td>
                     </tr>
@@ -181,7 +181,7 @@
                         <th>Shipping</th>
                         <input type="hidden" value="{{ $shipping }}" name="shipping_amount">
                         <td>(+) {{ format_currency($shipping) }}</td>
-                    </tr>
+                    </tr> --}}
 
                     @if ($cart_instance != 'purchase')
                         <tr id="total_amount">

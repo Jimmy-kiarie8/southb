@@ -41,7 +41,6 @@ class SaleController extends Controller
 
     public function store(StoreSaleRequest $request)
     {
-        // return $request->all();
 
         $cart_items = Cart::instance('sale')->content();
         if (count($cart_items) < 1) {
