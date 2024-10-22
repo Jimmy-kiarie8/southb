@@ -149,7 +149,7 @@
             </ul>
             <br>
 
-            <strong>{{ $sale->cu_inv_no }}</strong>
+            <strong>CU Invoice Number: {{ $sale->cu_inv_no }}</strong>
 
             {{-- <b>Please check the above products if suitable for your intended use before offloading. If any claim it
                 should be mentioned on the delivery note and signed by both parties, No claims will be taken later on if
