@@ -34,20 +34,9 @@
                                             value="INVOICE">
                                     </div>
                                 </div>
-                                <div class="col-lg-3">
-                                    <div class="from-group">
-                                        <div class="form-group">
-                                            <label for="customer_id">Customer </label>
-                                            <select class="form-control" name="customer_id" id="customer_id">
-                                                <option value="">Select</option>
-                                                @foreach (\Modules\People\Entities\Customer::all() as $customer)
-                                                    <option value="{{ $customer->id }}">{{ $customer->customer_name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+
+                                <livewire:customer-details />
+
 
 
                                 <div class="col-lg-3">

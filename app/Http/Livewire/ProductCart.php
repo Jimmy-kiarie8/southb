@@ -6,6 +6,7 @@ use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Livewire\Component;
+use Modules\People\Entities\Customer;
 use Modules\Product\Entities\Product;
 use Modules\Purchase\Entities\Purchase;
 use Modules\Sale\Entities\Sale;
@@ -31,6 +32,8 @@ class ProductCart extends Component
     public $sale_id;
     public $purchase_id;
 
+    public $customer_id;
+    public $customer_email;
 
     public function mount($cartInstance, $data = null, $sale_id = null, $purchase_id=null)
     {
@@ -89,6 +92,17 @@ class ProductCart extends Component
         return view('livewire.product-cart', [
             'cart_items' => $cart_items
         ]);
+    }
+
+
+    public function updatedCustomerId($value)
+    {
+        if ($value) {
+            $customer = Customer::find($value);
+            $this->customer_email = $customer ? $customer->customer_email : null;
+        } else {
+            $this->customer_email = null;
+        }
     }
 
 
