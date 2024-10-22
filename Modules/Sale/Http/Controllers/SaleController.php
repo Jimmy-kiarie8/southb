@@ -112,7 +112,7 @@ class SaleController extends Controller
                 'clientcode' => $customer_code,
                 'customer_name' => $customer_name,
                 'cu_inv_no' => $request->cu_inv_no,
-                'tax_percentage' => $request->tax_percentage,
+                'tax_percentage' => ($request->tax_percentage) ?? 16,
                 'discount_percentage' => $request->discount_percentage,
                 'shipping_amount' => $request->shipping_amount,
                 'paid_amount' => $paid_amount,
