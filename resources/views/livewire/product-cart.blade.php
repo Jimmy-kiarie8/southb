@@ -104,7 +104,7 @@
                                 </td>
 
                                 <td class="align-middle">
-                                    {{ format_currency($cart_item->options->product_tax) * $cart_item->qty }}
+                                    {{ format_currency($cart_item->options->product_tax) }}
                                 </td>
 
                                 <td class="align-middle">

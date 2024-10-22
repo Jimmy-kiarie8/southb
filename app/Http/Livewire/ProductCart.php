@@ -227,7 +227,7 @@ class ProductCart extends Component
         if ($this->cart_instance == 'sale' || $this->cart_instance == 'purchase_return') {
             if ($product->moq) {
                 if ((int)$product->moq > $this->quantity[$product_id]) {
-                    Log::alert("Bellow");
+                    // Log::alert("Bellow");
                     session()->flash('message', $product->product_name . ' is below MOQ!');
                     // return;
                 }
@@ -270,6 +270,7 @@ class ProductCart extends Component
                 'code'                  => $cart_item->options->code,
                 'stock'                 => $cart_item->options->stock,
                 'unit'                  => $cart_item->options->unit,
+                'product_tax'           => $cart_item->options->product_tax,
                 'product_tax'           => $cart_item->options->product_tax,
                 'wholesale_price'       => $cart_item->options->wholesale_price,
                 // 'unit_price'            => $price,
@@ -334,27 +335,36 @@ class ProductCart extends Component
     {
         $cart_item = Cart::instance($this->cart_instance)->get($row_id);
 
-        if ($this->discount_type[$product_id] == 'fixed') {
-            Cart::instance($this->cart_instance)
-                ->update($row_id, [
-                    'price' => ($cart_item->price + $cart_item->options->product_discount) - $this->item_discount[$product_id]
-                ]);
+        $product_discount = $this->item_discount[$product_id];
+        $discount_type = $this->discount_type[$product_id];
 
-            $discount_amount = $this->item_discount[$product_id];
-
-            $this->updateCartOptions($row_id, $product_id, $cart_item, $discount_amount);
-        } elseif ($this->discount_type[$product_id] == 'percentage') {
-            $discount_amount = ($cart_item->price + $cart_item->options->product_discount) * ($this->item_discount[$product_id]);
-
-            Cart::instance($this->cart_instance)
-                ->update($row_id, [
-                    'price' => ($cart_item->price + $cart_item->options->product_discount) - $discount_amount
-                ]);
-
-            $this->updateCartOptions($row_id, $product_id, $cart_item, $discount_amount);
+        if ($discount_type === 'fixed') {
+            $discount_amount = $product_discount;
+        } elseif ($discount_type === 'percentage') {
+            $discount_amount = ($cart_item->price * $product_discount) / 100;
+        } else {
+            $discount_amount = 0;
         }
 
-        session()->flash('discount_message' . $product_id, 'Discount added to the product!');
+        $sub_total = ($cart_item->price - $discount_amount) * $cart_item->qty;
+
+        Cart::instance($this->cart_instance)->update($row_id, [
+            'options' => [
+                'product_discount' => $product_discount,
+                'product_discount_type' => $discount_type,
+                'sub_total' => $sub_total,
+            ]
+        ]);
+
+        // Recalculate cart total after applying the discount
+        $cart_total = 0;
+        $cart_items = Cart::instance($this->cart_instance)->content();
+
+        foreach ($cart_items as $item) {
+            $cart_total += $item->options->sub_total;
+        }
+
+        $this->cart_total = $cart_total;
     }
 
     public function calculate($product)
