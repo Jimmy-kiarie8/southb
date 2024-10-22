@@ -137,7 +137,7 @@
         <hr>
         <br>
 
-        <div>
+        <div style="float: right">
             <h2>Terms & Conditions</h2>
             <ul>
                 <li>Pricing are subject to 16% VAT</li>

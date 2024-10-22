@@ -85,23 +85,23 @@
                             <div class="col-xs-4 col-xs-offset-8">
                                 <table class="table">
                                     <tbody>
-                                        <tr>
+                                        {{-- <tr>
                                             <td align="left"><strong>Discount
                                                     ({{ $sale->discount_percentage }}%)</strong></td>
                                             <td align="right">{{ format_currency($sale->discount_amount) }}</td>
-                                        </tr>
-
+                                        </tr> --}}
+{{--
                                         @if (env('TAX_APPLY'))
                                             <tr>
                                                 <td align="left"><strong>Tax ({{ $sale->tax_percentage }}%)</strong>
                                                 </td>
                                                 <td align="right">{{ format_currency($sale->tax_amount) }}</td>
                                             </tr>
-                                        @endif
-                                        <tr>
+                                        @endif --}}
+                                        {{-- <tr>
                                             <td align="left"><strong>Shipping</strong></td>
                                             <td align="right">{{ format_currency($sale->shipping_amount) }}</td>
-                                        </tr>
+                                        </tr> --}}
                                         {{-- <tr>
                                             <td align="left"><strong>Grand Total</strong></td>
                                             <td align="right">
@@ -124,10 +124,18 @@
         <div class="footer" style="height: 100px"> </div>
         <hr>
 
-        <div>
-            <b>Please check the above products if suitable for your intended use before offloading. If any claim it
-                should be mentioned on the delivery note and signed by both parties, No claims will be taken later on if
-                not mentioned on delivery note.</b> <br>
+        <div style="float: right">
+            <h2>Terms & Conditions</h2>
+            <ul>
+                <li>Pricing are subject to 16% VAT</li>
+                <li>Errors and omissions exempted</li>
+                <li>All prices quoted are absolutely confidential</li>
+                <li>Delivery 2 days after receiving the LPO</li>
+                <li>Payment cash on collection or delivery</li>
+                <li>Prices are subject to change without prior notice.</li>
+            </ul>
+            <br>
+
             <hr>
             <b>Above merchadise received in good condtion</b>
             <hr>
