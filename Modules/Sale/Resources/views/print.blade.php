@@ -97,8 +97,8 @@
                                     <tbody>
                                         <tr>
                                             <td align="left"><strong>Net Total
-                                                    ({{ $sale->total_amount - $sale->tax_amount }}%)</strong></td>
-                                            <td align="right">{{ format_currency($sale->discount_amount) }}</td>
+                                                    ()</strong></td>
+                                            <td align="right">{{ format_currency($sale->total_amount - $sale->tax_amount) }}</td>
                                         </tr>
 
                                         @if (env('TAX_APPLY'))
@@ -108,10 +108,10 @@
                                                 <td align="right">{{ format_currency($sale->tax_amount) }}</td>
                                             </tr>
                                         @endif
-                                        <tr>
+                                        {{-- <tr>
                                             <td align="left"><strong>Shipping</strong></td>
                                             <td align="right">{{ format_currency($sale->shipping_amount) }}</td>
-                                        </tr>
+                                        </tr> --}}
                                         <tr>
                                             <td align="left"><strong>Grand Total</strong></td>
                                             <td align="right">
