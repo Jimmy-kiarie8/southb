@@ -34,7 +34,7 @@
                                     <div>{{ settings()->company_address }}</div>
                                     <div>Email: {{ settings()->company_email }}</div>
                                     <div>Phone: {{ settings()->company_phone }}</div>
-                                    <div>PIN:  {{ env('KRA_PIN') }}</div>
+                                    <div>PIN: {{ env('KRA_PIN') }}</div>
                                 </td>
 
                                 <td align="center" width="33%">
@@ -99,7 +99,8 @@
                                         <tr>
                                             <td align="left"><strong>Net Total
                                                     ()</strong></td>
-                                            <td align="right">{{ format_currency($sale->total_amount - $sale->tax_amount) }}</td>
+                                            <td align="right">
+                                                {{ format_currency($sale->total_amount - $sale->tax_amount) }}</td>
                                         </tr>
 
                                         @if (env('TAX_APPLY'))
@@ -134,11 +135,23 @@
         <!-- Footer at the bottom -->
         <div class="footer" style="height: 100px"> </div>
         <hr>
+        <br>
 
         <div>
-            <b>Please check the above products if suitable for your intended use before offloading. If any claim it
+            <h2>Terms & Conditions</h2>
+            <ul>
+                <li>Pricing are subject to 16% VAT</li>
+                <li>Errors and omissions exempted</li>
+                <li>All prices quoted are absolutely confidential</li>
+                <li>Delivery 2 days after receiving the LPO</li>
+                <li>Payment cash on collection or delivery</li>
+                <li>Prices are subject to change without prior notice.</li>
+            </ul>
+
+            {{-- <b>Please check the above products if suitable for your intended use before offloading. If any claim it
                 should be mentioned on the delivery note and signed by both parties, No claims will be taken later on if
-                not mentioned on delivery note.</b> <br>
+                not mentioned on delivery note.</b>  --}}
+            <br>
             <hr>
             <b>Above merchadise received in good condtion</b>
             <hr>
