@@ -42,8 +42,8 @@
                                     </h4>
                                     <div><strong>{{ $customer->customer_name }}</strong></div>
                                     <div>{{ $customer->address }}</div>
-                                    <div>Email: {{ $customer->customer_email }}</div>
-                                    <div>Phone: {{ $customer->customer_phone }}</div>
+                                    {{-- <div>Email: {{ $customer->customer_email }}</div>
+                                    <div>Phone: {{ $customer->customer_phone }}</div> --}}
                                     <div>Pin: {{ $customer->pin }}</div>
                                 </td>
 
