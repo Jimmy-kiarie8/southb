@@ -8,7 +8,7 @@
         </a>
 
         <a target="_blank" href="{{ route('sales.pdf', $data->id) }}" class="dropdown-item">
-            <i class="bi bi-file-earmark-pdf mr-2 text-danger" style="line-height: 1;"></i> Invoice
+            <i class="bi bi-file-earmark-pdf mr-2 text-primary" style="line-height: 1;"></i> Invoice
         </a>
 
         <a href="{{ route('sale-returns.create', ['sale_id' => $data->id]) }}" class="dropdown-item">
