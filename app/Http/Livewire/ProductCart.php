@@ -35,53 +35,69 @@ class ProductCart extends Component
     public $customer_id;
     public $customer_email;
 
-    public function mount($cartInstance, $data = null, $sale_id = null, $purchase_id=null)
+    public $total_amount;
+    public function mount($cartInstance, $data = null, $sale_id = null, $purchase_id = null)
     {
         $this->cart_instance = $cartInstance;
         $this->cart_total = 0;
         $this->sale_id = $sale_id;
         $this->purchase_id = $purchase_id;
 
-        // $this->sale_type = 'Wholesale';
+        // Initialize with default values
+        $this->global_discount = 0;
+        $this->global_tax = 16;
+        $this->shipping = 0.00;
+        $this->check_quantity = [];
+        $this->quantity = [];
+        $this->discount_type = [];
+        $this->item_discount = [];
+
+        // Handle editing existing data
         if ($data) {
             $this->data = $data;
-
             $this->global_discount = $data->discount_percentage;
             $this->global_tax = $data->tax_percentage;
             $this->shipping = $data->shipping_amount;
-
-            $this->updatedGlobalTax();
-            $this->updatedGlobalDiscount();
 
             $cart_items = Cart::instance($this->cart_instance)->content();
 
             foreach ($cart_items as $cart_item) {
                 $this->check_quantity[$cart_item->id] = [$cart_item->options->stock];
                 $this->quantity[$cart_item->id] = $cart_item->qty;
+
+                // Ensure unit price is properly set
                 $this->price[$cart_item->id] = $cart_item->options->unit_price;
+
+                // Handle discount settings
                 $this->discount_type[$cart_item->id] = $cart_item->options->product_discount_type;
                 if ($cart_item->options->product_discount_type == 'fixed') {
                     $this->item_discount[$cart_item->id] = $cart_item->options->product_discount;
                 } elseif ($cart_item->options->product_discount_type == 'percentage') {
                     $this->item_discount[$cart_item->id] = round(100 * ($cart_item->options->product_discount / $cart_item->price));
                 }
+
+                // Update cart item with correct price and options
+                Cart::instance($this->cart_instance)->update($cart_item->rowId, [
+                    'price' => $cart_item->options->unit_price,
+                    'options' => array_merge($cart_item->options->toArray(), [
+                        'unit_price' => $cart_item->options->unit_price,
+                        'sub_total' => $cart_item->options->unit_price * $cart_item->qty
+                    ])
+                ]);
             }
-        } else {
-            $this->global_discount = 0;
-            $this->global_tax = 16;
-            $this->shipping = 0.00;
-            $this->check_quantity = [];
-            $this->quantity = [];
-            $this->discount_type = [];
-            $this->item_discount = [];
+
+            // Recalculate totals after loading items
+            $this->calculateTotals();
         }
 
-
+        // Load specific items if editing sale or purchase
         if ($this->sale_id) {
             $this->loadSaleItems();
+            $this->calculateTotals();
         }
         if ($this->purchase_id) {
             $this->loadPurchaseItems();
+            $this->calculateTotals();
         }
     }
 
@@ -223,6 +239,9 @@ class ProductCart extends Component
     public function removeItem($row_id)
     {
         Cart::instance($this->cart_instance)->remove($row_id);
+
+        $totals = $this->calculateTotals();
+        $this->total_amount = $totals['total_with_shipping'];
     }
 
     public function updatedGlobalTax()
@@ -239,6 +258,7 @@ class ProductCart extends Component
     {
         $cart_items = Cart::instance('sale')->content();
 
+        $this->emit('cartUpdated'); // If you're using events
 
 
         $product = Product::select('id', 'moq', 'product_name')->find($product_id);
@@ -266,19 +286,6 @@ class ProductCart extends Component
         }
 
         $this->cart_total = $cart_total;
-        // Cart::instance($this->cart_instance)->update($row_id, [
-        //     'options' => [
-        //         'sub_total'             => $cart_item->price * $cart_item->qty,
-        //         'code'                  => $cart_item->options->code,
-        //         'stock'                 => $cart_item->options->stock,
-        //         'unit'                  => $cart_item->options->unit,
-        //         'product_tax'           => $cart_item->options->product_tax,
-        //         'unit_price'            => $cart_item->options->unit_price,
-        //         'product_discount'      => $cart_item->options->product_discount,
-        //         'product_discount_type' => $cart_item->options->product_discount_type,
-        //     ]
-        // ]);
-        // $price = $this->price[$product_id];
 
         Cart::instance($this->cart_instance)->update($row_id, [
             // 'unit_price' => $price,
@@ -299,6 +306,9 @@ class ProductCart extends Component
 
         // $this->recalculateSubtotal($row_id);
 
+
+        $totals = $this->calculateTotals();
+        $this->total_amount = $totals['total_with_shipping'];
     }
 
     public function updatePrice($row_id, $product_id)
@@ -336,6 +346,26 @@ class ProductCart extends Component
         ]);
         // $this->recalculateSubtotal($row_id);
 
+        $totals = $this->calculateTotals();
+        $this->total_amount = $totals['total_with_shipping'];
+    }
+
+    public function calculateTotals()
+    {
+        // Get total including tax
+        $total_with_shipping = Cart::instance($this->cart_instance)->total() + (float)$this->shipping;
+
+        // Extract tax amount from total (16% VAT)
+        $tax = $total_with_shipping - ($total_with_shipping / 1.16);
+
+        // Calculate net total (total minus tax)
+        $netTotal = $total_with_shipping - $tax;
+
+        return [
+            'netTotal' => $netTotal,
+            'tax' => $tax,
+            'total_with_shipping' => $total_with_shipping
+        ];
     }
 
     public function updatedDiscountType($value, $name)
@@ -384,18 +414,18 @@ class ProductCart extends Component
         $wholesale_price = 0;
 
         if ($product['product_tax_type'] == 1) {
-            $price = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']/100));
+            $price = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax'] / 100));
             $unit_price = $product['product_price'];
-            $product_tax = $product['product_price'] * ($product['product_order_tax']/100);
-            $sub_total = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax']/100));
-            $wholesale_price = $product['wholesale_price'] + ($product['wholesale_price'] * ($product['product_order_tax']/100));
-            $cost_price = $product['product_cost'] + ($product['product_cost'] * ($product['product_order_tax']/100));
+            $product_tax = $product['product_price'] * ($product['product_order_tax'] / 100);
+            $sub_total = $product['product_price'] + ($product['product_price'] * ($product['product_order_tax'] / 100));
+            $wholesale_price = $product['wholesale_price'] + ($product['wholesale_price'] * ($product['product_order_tax'] / 100));
+            $cost_price = $product['product_cost'] + ($product['product_cost'] * ($product['product_order_tax'] / 100));
             $product_cost = $product['product_cost'];
         } elseif ($product['product_tax_type'] == 2) {
             $price = $product['product_price'];
             // $unit_price = $product['product_price'] - ($product['product_price'] * ($product['product_order_tax']/100));
             $unit_price = $product['product_price'];
-            $product_tax = $product['product_price'] * ($product['product_order_tax']/100);
+            $product_tax = $product['product_price'] * ($product['product_order_tax'] / 100);
             $sub_total = $product['product_price'];
             $wholesale_price = $product['wholesale_price'];
             $cost_price = $product['product_cost'];
