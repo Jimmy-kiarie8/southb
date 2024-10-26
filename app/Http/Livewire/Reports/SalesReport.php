@@ -135,8 +135,9 @@ class SalesReport extends Component
     }
     public function query3()
     {
-        $start_date = $this->start_date;
-        $end_date = $this->end_date;
+
+        $start_date = Carbon::parse($this->start_date)->startOfDay();
+        $end_date = Carbon::parse($this->end_date)->endOfDay();
 
         // Adjust the end date to the end of the day
         $adjusted_end_date = Carbon::parse($end_date)->endOfDay();
@@ -202,8 +203,9 @@ class SalesReport extends Component
 
     public function query12()
     {
-        $start_date = $this->start_date;
-        $end_date = $this->end_date;
+
+        $start_date = Carbon::parse($this->start_date)->startOfDay();
+        $end_date = Carbon::parse($this->end_date)->endOfDay();
 
 
         $productData = Product::select(

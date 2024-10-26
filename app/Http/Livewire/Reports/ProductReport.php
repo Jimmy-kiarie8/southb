@@ -74,7 +74,9 @@ class ProductReport extends Component
     public function query()
     {
 
-        $same_day = ($this->start_date == $this->end_date) ? true : false;
+        $start_date = Carbon::parse($this->start_date)->startOfDay();
+        $end_date = Carbon::parse($this->end_date)->endOfDay();
+        $same_day = ($start_date == $end_date) ? true : false;
         $sales = Sale::when($this->user_id, function ($query) {
                         return $query->where('user_id', $this->user_id);
                     })->orderBy('date', 'desc');
