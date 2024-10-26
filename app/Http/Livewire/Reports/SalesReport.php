@@ -171,8 +171,8 @@ class SalesReport extends Component
 
     public function query2()
     {
-        $start_date = $this->start_date;
-        $end_date = $this->end_date;
+        $start_date = Carbon::parse($this->start_date)->startOfDay();
+        $end_date = Carbon::parse($this->end_date)->endOfDay();
 
         $productData = Product::select(
             'products.id',
