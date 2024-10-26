@@ -15,26 +15,36 @@
 
 @section('content')
     @php
-        $directory = public_path('stockreports');
-        $files = File::glob($directory . '/*.pdf');
-        $latestFiles = array_slice(array_reverse($files), 0, 8);
+        // For stockreports
+        $directoryReports = public_path('stockreports');
+        $filesReports = File::glob($directoryReports . '/*.pdf');
+        $latestFilesReports = array_slice(array_reverse($filesReports), 0, 8);
 
-        // Convert the filesystem path to URL path for each file
-        $latestFiles = array_map(function ($file) {
-            return url('stockreports/' . basename($file));
-        }, $latestFiles);
+        // Convert stockreports paths to URLs
+        $fileUrlsReports = array_map(function ($file) {
+            return asset('stockreports/' . basename($file));
+        }, $latestFilesReports);
+
+        // For stocklevels
+        $directoryLevels = public_path('stocklevels');
+        $filesLevels = File::glob($directoryLevels . '/*.pdf');
+        $latestFilesLevels = array_slice(array_reverse($filesLevels), 0, 8);
+
+        // Convert stocklevels paths to URLs
+        $fileUrlsLevels = array_map(function ($file) {
+            return asset('stocklevels/' . basename($file));
+        }, $latestFilesLevels);
     @endphp
 
-    @php
-        $directory = public_path('stocklevels');
-        $fileL = File::glob($directory . '/*.pdf');
-        $latestFileL = array_slice(array_reverse($fileL), 0, 8);
+    {{-- For stockreports --}}
+    @foreach ($fileUrlsReports as $url)
+        <a href="{{ $url }}">{{ basename($url) }}</a>
+    @endforeach
 
-        // Convert the filesystem path to URL path for each file
-        $latestFileL = array_map(function ($file) {
-            return url('stocklevels/' . basename($file));
-        }, $latestFileL);
-    @endphp
+    {{-- For stocklevels --}}
+    @foreach ($fileUrlsLevels as $url)
+        <a href="{{ $url }}">{{ basename($url) }}</a>
+    @endforeach
 
 
     <div class="container-fluid">
