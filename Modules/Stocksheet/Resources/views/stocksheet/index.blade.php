@@ -15,36 +15,16 @@
 
 @section('content')
     @php
-        // For stockreports
-        $directoryReports = public_path('stockreports');
-        $filesReports = File::glob($directoryReports . '/*.pdf');
-        $latestFilesReports = array_slice(array_reverse($filesReports), 0, 8);
-
-        // Convert stockreports paths to URLs
-        $fileUrlsReports = array_map(function ($file) {
-            return asset('stockreports/' . basename($file));
-        }, $latestFilesReports);
-
-        // For stocklevels
-        $directoryLevels = public_path('stocklevels');
-        $filesLevels = File::glob($directoryLevels . '/*.pdf');
-        $latestFilesLevels = array_slice(array_reverse($filesLevels), 0, 8);
-
-        // Convert stocklevels paths to URLs
-        $fileUrlsLevels = array_map(function ($file) {
-            return asset('stocklevels/' . basename($file));
-        }, $latestFilesLevels);
+        $directory = public_path('stockreports');
+        $files = File::glob($directory . '/*.pdf');
+        $latestFiles = array_slice(array_reverse($files), 0, 8);
     @endphp
 
-    {{-- For stockreports --}}
-    @foreach ($fileUrlsReports as $url)
-        <a href="{{ $url }}">{{ basename($url) }}</a>
-    @endforeach
-
-    {{-- For stocklevels --}}
-    @foreach ($fileUrlsLevels as $url)
-        <a href="{{ $url }}">{{ basename($url) }}</a>
-    @endforeach
+    @php
+        $directory = public_path('stocklevels');
+        $fileL = File::glob($directory . '/*.pdf');
+        $latestFileL = array_slice(array_reverse($fileL), 0, 8);
+    @endphp
 
 
     <div class="container-fluid">
@@ -70,16 +50,17 @@
                                 style="border: 1px solid #dedede;border-radius: 10px;padding: 10px;background: #fff;">
                                 <div class="accordion-body">
 
+
                                     <div class="list-group">
                                         @foreach ($latestFiles as $file)
                                             @php
-                                                // If `$file` contains the full path, extract the filename to construct the correct URL
                                                 $filename = basename($file);
-                                                // Assuming 'stockreports' is the directory in `public`, use `asset()` to generate a public URL
-                                                $fileUrl = asset("pos/public/stockreports/{$filename}");
+                                                $fileUrl = asset("stockreports/{$filename}"); // Removed 'pos/public/'
                                             @endphp
                                             <a href="{{ $fileUrl }}" class="list-group-item list-group-item-action"
-                                                target="_blank">{{ $filename }}</a>
+                                                target="_blank">
+                                                {{ $filename }}
+                                            </a>
                                         @endforeach
                                     </div>
                                 </div>
@@ -102,16 +83,18 @@
                                 data-bs-parent="#accordionFlushExample"
                                 style="border: 1px solid #dedede;border-radius: 10px;padding: 10px;background: #fff;">
                                 <div class="accordion-body">
+
+
                                     <div class="list-group">
                                         @foreach ($latestFileL as $file)
                                             @php
-                                                // If `$file` contains the full path, extract the filename to construct the correct URL
                                                 $filename = basename($file);
-                                                // Assuming 'stockreports' is the directory in `public`, use `asset()` to generate a public URL
-                                                $fileUrl = asset("pos/public/stocklevels/{$filename}");
+                                                $fileUrl = asset("stocklevels/{$filename}"); // Removed 'pos/public/'
                                             @endphp
                                             <a href="{{ $fileUrl }}" class="list-group-item list-group-item-action"
-                                                target="_blank">{{ $filename }}</a>
+                                                target="_blank">
+                                                {{ $filename }}
+                                            </a>
                                         @endforeach
                                     </div>
                                 </div>
