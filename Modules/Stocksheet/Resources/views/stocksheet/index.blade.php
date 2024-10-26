@@ -14,19 +14,28 @@
 @endsection
 
 @section('content')
-
     @php
         $directory = public_path('stockreports');
         $files = File::glob($directory . '/*.pdf');
         $latestFiles = array_slice(array_reverse($files), 0, 8);
-    @endphp
 
+        // Convert the filesystem path to URL path for each file
+        $latestFiles = array_map(function ($file) {
+            return url('stockreports/' . basename($file));
+        }, $latestFiles);
+    @endphp
 
     @php
         $directory = public_path('stocklevels');
         $fileL = File::glob($directory . '/*.pdf');
         $latestFileL = array_slice(array_reverse($fileL), 0, 8);
+
+        // Convert the filesystem path to URL path for each file
+        $latestFileL = array_map(function ($file) {
+            return url('stocklevels/' . basename($file));
+        }, $latestFileL);
     @endphp
+
 
     <div class="container-fluid">
 
@@ -85,16 +94,15 @@
                                 <div class="accordion-body">
                                     <div class="list-group">
                                         @foreach ($latestFileL as $file)
-                                        @php
-                                            // If `$file` contains the full path, extract the filename to construct the correct URL
-                                            $filename = basename($file);
-                                            // Assuming 'stockreports' is the directory in `public`, use `asset()` to generate a public URL
-                                            $fileUrl = asset("pos/public/stocklevels/{$filename}");
-                                        @endphp
-                                        <a href="{{ $fileUrl }}"
-                                           class="list-group-item list-group-item-action"
-                                           target="_blank">{{ $filename }}</a>
-                                    @endforeach
+                                            @php
+                                                // If `$file` contains the full path, extract the filename to construct the correct URL
+                                                $filename = basename($file);
+                                                // Assuming 'stockreports' is the directory in `public`, use `asset()` to generate a public URL
+                                                $fileUrl = asset("pos/public/stocklevels/{$filename}");
+                                            @endphp
+                                            <a href="{{ $fileUrl }}" class="list-group-item list-group-item-action"
+                                                target="_blank">{{ $filename }}</a>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
