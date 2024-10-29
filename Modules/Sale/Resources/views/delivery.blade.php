@@ -7,7 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Delivery Note</title>
     <link rel="stylesheet" href="{{ public_path('b3/bootstrap.min.css') }}">
-
+    <style>
+        td {
+            font-size: 11px !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -72,8 +76,7 @@
                                     @foreach ($sale->saleDetails as $item)
                                         <tr>
                                             <td>{{ $item->quantity }}</td>
-                                            <td>{{ $item->product_name }}<br><span
-                                                    class="badge badge-success">{{ $item->product_code }}</span></td>
+                                            <td>{{ $item->product_name }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

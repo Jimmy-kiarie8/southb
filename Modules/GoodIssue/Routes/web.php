@@ -11,6 +11,8 @@
 |
 */
 
+use Modules\GoodIssue\Entities\GoodIssue;
+
 Route::prefix('goodissue')->group(function() {
     Route::get('/', 'GoodIssueController@index')->name('goodissue.index');
     Route::get('/create', 'GoodIssueController@create')->name('goodissue.create');
@@ -21,10 +23,10 @@ Route::prefix('goodissue')->group(function() {
 
     //Generate PDF
     Route::get('/sales/pdf/{id}', function ($id) {
-        $sale = \Modules\Sale\Entities\Sale::find($id);
+        $sale = GoodIssue::find($id);
 
         if (!$sale) {
-            $sale = \Modules\Sale\Entities\Sale::with('saleDetails')->where('reference', $id)->firstOrFail();
+            $sale = GoodIssue::with('saleDetails')->where('reference', $id)->firstOrFail();
         }
         // $customer = \Modules\People\Entities\Customer::findOrFail($sale->customer_id);
         $customer = \Modules\People\Entities\Customer::find($sale->customer_id);
