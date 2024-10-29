@@ -36,7 +36,7 @@ Route::prefix('goodissue')->group(function() {
         }
         // use Barryvdh\DomPDF\Facade\Pdf;
 
-        $pdf = Pdf::loadView('sale::print', [
+        $pdf = Pdf::loadView('goodissue::print', [
             'sale' => $sale,
             'customer' => $customer,
         ])->setPaper('a4');
