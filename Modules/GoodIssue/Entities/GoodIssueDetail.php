@@ -10,7 +10,7 @@ use Modules\Product\Entities\Product;
 
 class GoodIssueDetail extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $guarded = [];
 
@@ -21,9 +21,9 @@ class GoodIssueDetail extends Model
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
-    public function sale() {
+    public function goodIssue() {
         // return $this->belongsTo(Sale::class, 'reference', 'id');
-        return $this->belongsTo(GoodIssue::class, 'goodissue_id', 'id');
+        return $this->belongsTo(GoodIssue::class, 'good_issue_id', 'id');
     }
 
     public function getPriceAttribute($value) {

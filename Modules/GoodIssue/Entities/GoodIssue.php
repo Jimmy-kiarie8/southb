@@ -19,22 +19,22 @@ use Modules\Product\Entities\Product;
 
 class GoodIssue extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $guarded = [];
     // protected $appends = ['tax_charge'];
 
     public function saleDetails() {
-        return $this->hasMany(GoodIssueDetail::class, 'goodissue_id', 'id');
+        return $this->hasMany(GoodIssueDetail::class, 'good_issue_id', 'id');
         // return $this->hasMany(SaleDetails::class, 'reference', 'reference');
     }
 
     public function salePayments() {
-        return $this->hasMany(GoodIssueDetail::class, 'goodissue_id', 'id');
+        return $this->hasMany(GoodIssueDetail::class, 'good_issue_id', 'id');
     }
 
     public function invoice() {
-        return $this->hasOne(Invoice::class, 'goodissue_id');
+        return $this->hasOne(Invoice::class, 'good_issue_id');
     }
 
 
@@ -46,8 +46,8 @@ class GoodIssue extends Model
     public function products(): BelongsToMany
     {
         // return $this->belongsToMany(Product::class, 'sale_details','product_code', 'product_code');
-        return $this->belongsToMany(GoodIssueDetail::class, 'sale_details', 'product_id', 'goodissue_id');
-        // return $this->belongsToMany(Product::class, 'product_id', 'goodissue_id');
+        return $this->belongsToMany(GoodIssueDetail::class, 'sale_details', 'product_id', 'good_issue_id');
+        // return $this->belongsToMany(Product::class, 'product_id', 'good_issue_id');
     }
 
     /**
