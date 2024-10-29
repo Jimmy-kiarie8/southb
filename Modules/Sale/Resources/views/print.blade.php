@@ -7,7 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Sale Details</title>
     <link rel="stylesheet" href="{{ public_path('b3/bootstrap.min.css') }}">
-
+    <style>
+        td {
+            font-size: 11px !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,9 +20,9 @@
             <div class="col-xs-12">
                 <div style="text-align: center; margin-bottom: 25px;">
                     <img width="180" src="{{ public_path('images/logo/logo.png') }}" alt="Logo">
-                    <h4 style="margin-bottom: 20px;">
+                    {{-- <h4 style="margin-bottom: 20px;">
                         <span>Reference:</span> <strong>{{ $sale->reference }}</strong>
-                    </h4>
+                    </h4> --}}
                 </div>
 
                 <div class="card">
@@ -28,8 +32,8 @@
                         <table width="100%" cellpadding="10">
                             <tr>
                                 <td align="left" width="33%">
-                                    <h4 style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Company Info:
-                                    </h4>
+                                    <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Company Info:
+                                    </b>
                                     <div><strong>{{ settings()->company_name }}</strong></div>
                                     <div>{{ settings()->company_address }}</div>
                                     <div>Email: {{ settings()->company_email }}</div>
@@ -38,8 +42,8 @@
                                 </td>
 
                                 <td align="center" width="33%">
-                                    <h4 style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Customer Info:
-                                    </h4>
+                                    <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Customer Info:
+                                    </b>
                                     <div><strong>{{ $customer->customer_name }}</strong></div>
                                     <div>{{ $customer->address }}</div>
                                     {{-- <div>Email: {{ $customer->customer_email }}</div>
@@ -48,8 +52,8 @@
                                 </td>
 
                                 <td align="right" width="33%">
-                                    <h4 style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Invoice Info:
-                                    </h4>
+                                    <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Invoice Info:
+                                    </b>
                                     <div>Invoice: <strong>INV/{{ $sale->reference }}</strong></div>
                                     <div>Date: {{ \Carbon\Carbon::parse($sale->date)->format('d M, Y') }}</div>
                                     <div>Status: <strong>{{ $sale->status }}</strong></div>
@@ -76,8 +80,10 @@
                                 <tbody>
                                     @foreach ($sale->saleDetails as $item)
                                         <tr>
-                                            <td>{{ $item->product_name }}<br><span
-                                                    class="badge badge-success">{{ $item->product_code }}</span></td>
+                                            <td>{{ $item->product_name }}</td>
+
+                                            {{-- <td>{{ $item->product_name }}(<span
+                                                    class="">{{ $item->product_code }}</span>)</td> --}}
                                             <td>{{ format_currency($item->unit_price) }}</td>
                                             <td>{{ $item->quantity }}</td>
                                             <td>{{ format_currency($item->product_discount_amount) }}</td>
@@ -133,7 +139,7 @@
         </div>
 
         <!-- Footer at the bottom -->
-        <div class="footer" style="height: 100px"> </div>
+        <div class="footer" style="height: 15px"> </div>
         <hr>
         <br>
 
