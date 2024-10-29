@@ -124,8 +124,7 @@
         </div>
 
         <!-- Footer at the bottom -->
-        <div class="footer" style="height: 100px"> </div>
-        <hr>
+        <div class="footer" style="height: 25px"> </div>
 
         <div>
             <div style="float: right">

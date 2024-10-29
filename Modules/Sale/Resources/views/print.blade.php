@@ -97,6 +97,7 @@
                             </table>
                         </div>
 
+
                         <!-- Summary Section -->
                         <div class="row">
                             <div class="col-xs-4 col-xs-offset-8">
@@ -139,9 +140,8 @@
         </div>
 
         <!-- Footer at the bottom -->
-        <div class="footer" style="height: 15px"> </div>
+        <div class="footer" style="height: 45px"> </div>
         <hr>
-        <br>
 
         <div>
             <div style="float: right">
