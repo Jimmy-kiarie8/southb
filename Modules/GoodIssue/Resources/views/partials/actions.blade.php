@@ -6,6 +6,11 @@
         <a target="_blank" href="{{ route('goodissue.pdf', $data->id) }}" class="dropdown-item">
             <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> Invoice
         </a>
+        @can('edit_sales')
+            <a href="{{ route('goodissue.edit', $data->id) }}" class="dropdown-item">
+                <i class="bi bi-pencil mr-2 text-primary" style="line-height: 1;"></i> Edit
+            </a>
+        @endcan
 
       {{--   <a target="_blank" href="{{ route('sales.delivery', $data->id) }}" class="dropdown-item">
             <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> Delivery Note
@@ -22,11 +27,6 @@
                 <i class="bi bi-plus-circle-dotted mr-2 text-success" style="line-height: 1;"></i> Add Payment
             </a>
             @endif
-        @endcan
-        @can('edit_sales')
-            <a href="{{ route('sales.edit', $data->id) }}" class="dropdown-item">
-                <i class="bi bi-pencil mr-2 text-primary" style="line-height: 1;"></i> Edit
-            </a>
         @endcan
         @can('show_sales')
             <a href="{{ route('sales.show', $data->id) }}" class="dropdown-item">

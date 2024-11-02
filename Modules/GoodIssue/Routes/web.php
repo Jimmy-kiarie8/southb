@@ -16,7 +16,9 @@ use Modules\GoodIssue\Entities\GoodIssue;
 Route::prefix('goodissue')->group(function() {
     Route::get('/', 'GoodIssueController@index')->name('goodissue.index');
     Route::get('/create', 'GoodIssueController@create')->name('goodissue.create');
+    Route::get('/{id}/edit', 'GoodIssueController@edit')->name('goodissue.edit');
     Route::post('/', 'GoodIssueController@store')->name('goodissue.store');
+    Route::patch('/{id}', 'GoodIssueController@update')->name('goodissue.update');
     // Route::resource('/', 'GoodIssueController')->name("goodissue");
 
 

@@ -293,10 +293,10 @@ class GoodIssueController extends Controller
     public function edit($id)
     {
         abort_if(Gate::denies('edit_sales'), 403);
-        $sale = Sale::with('saleDetails')->find($id);
+        $sale = GoodIssue::with('saleDetails')->find($id);
 
         if (!$sale) {
-            $sale = Sale::with('saleDetails')->where('reference', $id)->firstOrFail();
+            $sale = GoodIssue::with('saleDetails')->where('reference', $id)->firstOrFail();
         }
 
         // return $sale->saleDetails;
@@ -335,12 +335,13 @@ class GoodIssueController extends Controller
             ]);
         }
 
-        return view('sale::edit', compact('sale'));
+        return view('goodissue::edit', compact('sale'));
     }
 
 
-    public function update(UpdateSaleRequest $request, Sale $sale)
+    public function update(Request $request, GoodIssue $sale)
     {
+        $sale = GoodIssue::find($request->id);
         DB::transaction(function () use ($request, $sale) {
 
             $due_amount = $request->total_amount - $request->paid_amount;
@@ -383,7 +384,7 @@ class GoodIssueController extends Controller
             ]);
 
             foreach (Cart::instance('sale')->content() as $cart_item) {
-                SaleDetails::create([
+                GoodIssueDetail::create([
                     'good_issue_id' => $sale->id,
                     'product_id' => $cart_item->id,
                     'product_name' => $cart_item->name,
@@ -410,7 +411,7 @@ class GoodIssueController extends Controller
 
         toast('Sale Updated!', 'info');
 
-        return redirect()->route('sales.index');
+        return redirect()->route('goodissue.index');
     }
 
 

@@ -23,7 +23,7 @@
                 <div class="card">
                     <div class="card-body">
                         @include('utils.alerts')
-                        <form id="sale-form" action="{{ route('sales.update', $sale) }}" method="POST">
+                        <form id="sale-form" action="{{ route('goodissue.update', $sale) }}" method="POST">
                             @csrf
                             @method('patch')
                             <div class="form-row">
@@ -79,7 +79,7 @@
                                 <div class="col-lg-4">
                                     <div class="form-group">
                                         <label for="paid_amount">Amount Received <span class="text-danger">*</span></label>
-                                        <input id="paid_amount" type="text" class="form-control" name="paid_amount" required value="{{ $sale->paid_amount }}" readonly>
+                                        <input id="paid_amount" type="text" class="form-control" name="paid_amount" required value="{{ $sale->paid_amount }}">
                                     </div>
                                 </div>
                             </div>
