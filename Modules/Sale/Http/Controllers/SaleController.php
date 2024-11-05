@@ -319,7 +319,7 @@ class SaleController extends Controller
             $due_amount = $request->total_amount - $request->paid_amount;
 
             if ($due_amount == $request->total_amount) {
-                $payment_status = 'Unpaid';
+                $payment_status = 'Credit';
             } elseif ($due_amount > 0) {
                 $payment_status = 'Partial';
             } else {

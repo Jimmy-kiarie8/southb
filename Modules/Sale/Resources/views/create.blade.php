@@ -101,7 +101,7 @@
 
                                 <div class="col-lg-4">
                                     <label for="total_amount">Amount paid</label>
-                                    <input type="number" name="total_amount" class="form-control" value="0"
+                                    <input type="text" name="total_amount" class="form-control" value="0"
                                         id="">
                                 </div>
 
