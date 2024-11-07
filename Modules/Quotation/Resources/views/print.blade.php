@@ -124,6 +124,38 @@
                             <p style="font-style: italic;text-align: center">{{ settings()->company_name }} &copy; {{ date('Y') }}</p>
                         </div>
                     </div>
+
+
+        <!-- Footer at the bottom -->
+        <div class="footer" style="height: 45px"> </div>
+        <hr>
+
+        <div>
+            <div style="float: right">
+            <h2>Terms & Conditions</h2>
+            <ul>
+                <li>Pricing are subject to 16% VAT</li>
+                <li>Errors and omissions exempted</li>
+                <li>All prices quoted are absolutely confidential</li>
+                <li>Delivery 2 days after receiving the LPO</li>
+                <li>Payment cash on collection or delivery</li>
+                <li>Prices are subject to change without prior notice.</li>
+            </ul>
+            </div>
+            <br>
+
+
+            {{-- <b>Please check the above products if suitable for your intended use before offloading. If any claim it
+                should be mentioned on the delivery note and signed by both parties, No claims will be taken later on if
+                not mentioned on delivery note.</b>  --}}
+            <br>
+            <hr>
+            <b>Above merchadise received in good condition</b>
+            <hr>
+            <div>
+                <p>Received By______________________ Signature______________</p>
+            </div>
+        </div>
                 </div>
             </div>
         </div>
