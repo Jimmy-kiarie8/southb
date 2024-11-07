@@ -341,7 +341,7 @@ class SaleController extends Controller
                 'reference' => $request->reference,
                 'customer_id' => $request->customer_id,
                 'customer_name' => Customer::findOrFail($request->customer_id)->customer_name,
-                'tax_percentage' => $request->tax_percentage,
+                'tax_percentage' => ($request->tax_percentage) ? $request->tax_percentage : 0,
                 'discount_percentage' => $request->discount_percentage,
                 'shipping_amount' => $request->shipping_amount,
                 'paid_amount' => $request->paid_amount,

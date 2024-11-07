@@ -16,7 +16,7 @@ class StorePosSaleRequest extends FormRequest
     {
         return [
             'customer_id' => 'required|numeric',
-            'tax_percentage' => 'required|integer|min:0|max:100',
+            'tax_percentage' => 'nullable|integer|min:0|max:100',
             'discount_percentage' => 'required|integer|min:0|max:100',
             'shipping_amount' => 'required|numeric',
             'total_amount' => 'required|numeric',
