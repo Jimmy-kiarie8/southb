@@ -347,6 +347,8 @@ class SaleController extends Controller
                 'paid_amount' => $request->paid_amount,
                 'total_amount' => $request->total_amount,
                 'due_amount' => $due_amount,
+                'cu_inv_no' => $request->cu_inv_no,
+
                 'status' => $request->status,
                 'payment_status' => $payment_status,
                 'payment_method' => $request->payment_method,
