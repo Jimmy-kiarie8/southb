@@ -10,6 +10,7 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,7 @@ Route::group(['middleware' => 'auth'], function () {
         $quotation = \Modules\Quotation\Entities\Quotation::findOrFail($id);
         $customer = \Modules\People\Entities\Customer::findOrFail($quotation->customer_id);
 
-        $pdf = \PDF::loadView('quotation::print', [
+        $pdf = Pdf::loadView('quotation::print', [
             'quotation' => $quotation,
             'customer' => $customer,
         ])->setPaper('a4');
@@ -32,7 +33,7 @@ Route::group(['middleware' => 'auth'], function () {
         $lpo = \Modules\Quotation\Entities\Lpo::findOrFail($id);
         $supplier = \Modules\People\Entities\Supplier::findOrFail($lpo->supplier_id);
 
-        $pdf = \PDF::loadView('quotation::lpo.print', [
+        $pdf = Pdf::loadView('quotation::lpo.print', [
             'lpo' => $lpo,
             'supplier' => $supplier,
         ])->setPaper('a4');
