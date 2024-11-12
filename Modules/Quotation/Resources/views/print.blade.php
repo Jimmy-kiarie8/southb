@@ -20,36 +20,51 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-xs-4 mb-3 mb-md-0">
-                            <h4 class="mb-2" style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Company Info:</h4>
-                            <div><strong>{{ settings()->company_name }}</strong></div>
-                            <div>{{ settings()->company_address }}</div>
-                            <div>Email: {{ settings()->company_email }}</div>
-                            <div>Phone: {{ settings()->company_phone }}</div>
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <!-- Aligning Company Info, Customer Info, and Invoice Info -->
+                        <table width="100%" cellpadding="10">
+                            <tr>
+                                <td align="left" width="33%">
+                                    <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Company Info:
+                                    </b>
+                                    <div><strong>{{ settings()->company_name }}</strong></div>
+                                    <div>{{ settings()->company_address }}</div>
+                                    <div>Email: {{ settings()->company_email }}</div>
+                                    <div>Phone: {{ settings()->company_phone }}</div>
+                                    <div>PIN: {{ env('KRA_PIN') }}</div>
+                                </td>
+
+                                <td align="center" width="33%">
+                                    <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Customer Info:
+                                    </b>
+                                    <div><strong>{{ $customer->customer_name }}</strong></div>
+                                    <div>{{ $customer->address }}</div>
+                                    {{-- <div>Email: {{ $customer->customer_email }}</div>
+                                    <div>Phone: {{ $customer->customer_phone }}</div> --}}
+                                    <div>Pin: {{ $customer->pin }}</div>
+                                </td>
+
+                                <td align="right" width="33%">
+                                    <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Invoice Info:
+                                    </b>
+                                    {{-- <div>Date: {{ \Carbon\Carbon::parse($sale->date)->format('d M, Y') }}</div>
+                                    <div>Status: <strong>{{ $sale->status }}</strong></div>
+                                    <div>Payment Status: <strong>{{ $sale->payment_status }}</strong></div> --}}
+                                </td>
+                            </tr>
+                        </table>
+
                         </div>
 
-                        <div class="col-xs-4 mb-3 mb-md-0">
-                            <h4 class="mb-2" style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Customer Info:</h4>
-                            <div><strong>{{ $customer->customer_name }}</strong></div>
-                            <div>{{ $customer->address }}</div>
-                            <div>Email: {{ $customer->customer_email }}</div>
-                            <div>Phone: {{ $customer->customer_phone }}</div>
                         </div>
 
-                        <div class="col-xs-4 mb-3 mb-md-0">
-                            <h4 class="mb-2" style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Invoice Info:</h4>
-                            <div>Invoice: <strong>INV/{{ $quotation->reference }}</strong></div>
-                            <div>Date: {{ \Carbon\Carbon::parse($quotation->date)->format('d M, Y') }}</div>
-                            <div>
-                                Status: <strong>{{ $quotation->status }}</strong>
-                            </div>
-                            <div>
-                                Payment Status: <strong>{{ $quotation->payment_status }}</strong>
-                            </div>
-                        </div>
 
                     </div>
+
+                </div>
 
                     <div class="table-responsive-sm" style="margin-top: 30px;">
                         <table class="table table-striped">
@@ -119,15 +134,15 @@
                             </table>
                         </div>
                     </div>
-                    <div class="row" style="margin-top: 25px;">
+                    {{-- <div class="row" style="margin-top: 25px;">
                         <div class="col-xs-12">
                             <p style="font-style: italic;text-align: center">{{ settings()->company_name }} &copy; {{ date('Y') }}</p>
                         </div>
-                    </div>
+                    </div> --}}
 
 
         <!-- Footer at the bottom -->
-        <div class="footer" style="height: 45px"> </div>
+        <div class="footer" style="height: 105px"> </div>
         <hr>
 
         <div>
@@ -150,7 +165,7 @@
                 not mentioned on delivery note.</b>  --}}
             <br>
             <hr>
-            <b>Above merchadise received in good condition</b>
+            <b>Above merchandise received in good condition</b>
             <hr>
             <div>
                 <p>Received By______________________ Signature______________</p>

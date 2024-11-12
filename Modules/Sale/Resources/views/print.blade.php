@@ -164,7 +164,7 @@
                 not mentioned on delivery note.</b>  --}}
             <br>
             <hr>
-            <b>Above merchadise received in good condition</b>
+            <b>Above merchandise received in good condition</b>
             <hr>
             <div>
                 <p>Received By______________________ Signature______________</p>

@@ -141,7 +141,7 @@
             <br>
 
             <hr>
-            <b>Above merchadise received in good condtion</b>
+            <b>Above merchandise received in good condtion</b>
             <hr>
             <div>
                 <p>Delivered By______________________ Signature______________</p>
