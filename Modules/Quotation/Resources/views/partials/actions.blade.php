@@ -4,6 +4,11 @@
     </button>
     <div class="dropdown-menu">
         @can('create_quotation_sales')
+            <a href="{{ route('quotations.pdf', $data->id) }}" class="dropdown-item" target="_blank">
+            <i class="bi bi-file-earmark-pdf mr-2 text-success" style="line-height: 1;"></i> Print
+            </a>
+        @endcan
+        @can('create_quotation_sales')
             <a href="{{ route('quotation-sales.create', $data) }}" class="dropdown-item">
                 <i class="bi bi-check2-circle mr-2 text-success" style="line-height: 1;"></i> Make Sale
             </a>

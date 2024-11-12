@@ -82,6 +82,13 @@
                                         <input id="paid_amount" type="text" class="form-control" name="paid_amount" required value="{{ $sale->paid_amount }}" readonly>
                                     </div>
                                 </div>
+
+
+                                <div class="col-lg-4">
+                                    <label for="total_amount">CU Invoice Number</label>
+                                    <input type="text" name="cu_inv_no" class="form-control" value="{{ $sale->cu_inv_no }}"
+                                        id="">
+                                </div>
                             </div>
 
                             <div class="form-group">
