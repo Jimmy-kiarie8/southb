@@ -54,7 +54,7 @@
                                 <td align="right" width="33%">
                                     <b style="border-bottom: 1px solid #dddddd; padding-bottom: 10px;">Quotation Info:
                                     </b>
-                                    <div>Quote No: <strong>{{ $quotation->payment_status }}</strong></div>
+                                    <div>Quote No: <strong>{{ $quotation->reference }}</strong></div>
                                     <div>Date: {{ \Carbon\Carbon::parse($quotation->date)->format('d M, Y') }}</div>
                                     <div>Status: <strong>{{ $quotation->status }}</strong></div>
                                 </td>
