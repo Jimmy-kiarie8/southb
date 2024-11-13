@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-xs-12">
             <div style="text-align: center;margin-bottom: 25px;">
-                <img width="180" src="{{ public_path('images/logo/logo.png') }}" alt="Logo">
+                <img width="100" src="{{ public_path('images/logo/logo.png') }}" alt="Logo">
                 <h4 style="margin-bottom: 20px;">
                     <span>Reference::</span> <strong>{{ $quotation->reference }}</strong>
                 </h4>
@@ -131,7 +131,7 @@
                                     <td class="right">{{ format_currency($quotation->shipping_amount) }}</td>
                                 </tr> --}}
                                 <tr>
-                                    <td class="left"><strong>Grand Total</strong></td>
+                                    <td class="left"><strong>Total</strong></td>
                                     <td class="right"><strong>{{ format_currency($quotation->total_amount) }}</strong></td>
                                 </tr>
                                 </tbody>
