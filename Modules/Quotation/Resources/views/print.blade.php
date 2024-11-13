@@ -7,7 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Quotation Details</title>
     <link rel="stylesheet" href="{{ public_path('b3/bootstrap.min.css') }}">
-</head>
+</head>    <style>
+    td {
+        font-size: 11px !important;
+    }
+</style>
 <body>
 <div class="container-fluid">
     <div class="row">
