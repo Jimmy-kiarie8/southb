@@ -83,7 +83,7 @@
                                 <tr>
                                     <td class="align-middle">
                                         {{ $item->product_name }} <br>
-                                        <small class="badge badge-success">
+                                        <small>
                                                 {{ $item->product_code }}
                                             </small>
                                     </td>
@@ -110,7 +110,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="row">
+                    {{-- <div class="row">
                         <div class="col-xs-4 col-xs-offset-8">
                             <table class="table">
                                 <tbody>
@@ -133,7 +133,7 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> --}}
                     {{-- <div class="row" style="margin-top: 25px;">
                         <div class="col-xs-12">
                             <p style="font-style: italic;text-align: center">{{ settings()->company_name }} &copy; {{ date('Y') }}</p>
