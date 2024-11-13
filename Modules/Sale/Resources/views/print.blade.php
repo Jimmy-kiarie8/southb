@@ -153,7 +153,6 @@
                 </tr>
             </thead>
         </table>
-
         <div>
             <div style="float: right">
             <h2>Terms & Conditions</h2>
@@ -175,7 +174,7 @@
                 not mentioned on delivery note.</b>  --}}
             <br>
             <hr>
-            <b>Above merchandise received in good condition</b>
+            <b>Above merchadise received in good condition</b>
             <hr>
             <div>
                 <p>Received By______________________ Signature______________</p>
