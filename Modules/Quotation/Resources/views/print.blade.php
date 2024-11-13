@@ -107,7 +107,7 @@
                                     </td>
 
                                     <td class="align-middle">
-                                        {{ format_currency($item->sub_total) }}
+                                        {{ format_currency($item->unit_price * $item->quantity) }}
                                     </td>
                                 </tr>
                             @endforeach
