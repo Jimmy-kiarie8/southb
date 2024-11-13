@@ -78,7 +78,7 @@
                                 <th class="align-middle">Net Unit Price</th>
                                 <th class="align-middle">Quantity</th>
                                 <th class="align-middle">Discount</th>
-                                <th class="align-middle">Tax</th>
+                                {{-- <th class="align-middle">Tax</th> --}}
                                 <th class="align-middle">Total</th>
                             </tr>
                             </thead>
@@ -102,9 +102,9 @@
                                         {{ format_currency($item->product_discount_amount) }}
                                     </td>
 
-                                    <td class="align-middle">
+                                    {{-- <td class="align-middle">
                                         {{ format_currency($item->product_tax_amount) }}
-                                    </td>
+                                    </td> --}}
 
                                     <td class="align-middle">
                                         {{ format_currency($item->unit_price * $item->quantity) }}
