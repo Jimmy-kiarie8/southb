@@ -79,7 +79,7 @@
                                 <th class="align-middle">Quantity</th>
                                 <th class="align-middle">Discount</th>
                                 <th class="align-middle">Tax</th>
-                                <th class="align-middle">Sub Total</th>
+                                <th class="align-middle">Total</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -114,11 +114,11 @@
                             </tbody>
                         </table>
                     </div>
-                    {{-- <div class="row">
+                    <div class="row">
                         <div class="col-xs-4 col-xs-offset-8">
                             <table class="table">
                                 <tbody>
-                                <tr>
+                                {{-- <tr>
                                     <td class="left"><strong>Discount ({{ $quotation->discount_percentage }}%)</strong></td>
                                     <td class="right">{{ format_currency($quotation->discount_amount) }}</td>
                                 </tr>
@@ -129,7 +129,7 @@
                                 <tr>
                                     <td class="left"><strong>Shipping)</strong></td>
                                     <td class="right">{{ format_currency($quotation->shipping_amount) }}</td>
-                                </tr>
+                                </tr> --}}
                                 <tr>
                                     <td class="left"><strong>Grand Total</strong></td>
                                     <td class="right"><strong>{{ format_currency($quotation->total_amount) }}</strong></td>
@@ -137,7 +137,7 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div> --}}
+                    </div>
                     {{-- <div class="row" style="margin-top: 25px;">
                         <div class="col-xs-12">
                             <p style="font-style: italic;text-align: center">{{ settings()->company_name }} &copy; {{ date('Y') }}</p>
@@ -146,7 +146,7 @@
 
 
         <!-- Footer at the bottom -->
-        <div class="footer" style="height: 105px"> </div>
+        <div class="footer" style="height: 45px"> </div>
         <hr>
 
         <div>
