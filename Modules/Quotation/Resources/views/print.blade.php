@@ -75,7 +75,7 @@
                             <thead>
                             <tr>
                                 <th class="align-middle">Product</th>
-                                <th class="align-middle">Net Unit Price</th>
+                                <th class="align-middle">Unit Price</th>
                                 <th class="align-middle">Quantity</th>
                                 <th class="align-middle">Discount</th>
                                 {{-- <th class="align-middle">Tax</th> --}}
