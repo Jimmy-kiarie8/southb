@@ -68,7 +68,7 @@
                                 <thead>
                                     <tr>
                                         <th>Product</th>
-                                        <th>Net Unit Price</th>
+                                        <th>Unit Price</th>
                                         <th>Quantity</th>
                                         <th>Discount</th>
                                         {{-- @if (env('TAX_APPLY'))
