@@ -353,7 +353,8 @@ class SaleController extends Controller
                 'payment_status' => $payment_status,
                 'payment_method' => $request->payment_method,
                 'note' => $request->note,
-                'tax_amount' => Cart::instance('sale')->tax(),
+                'tax_amount' => $request->total_amount - $request->total_amount / 1.16,
+                // 'tax_amount' => Cart::instance('sale')->tax(),
                 'discount_amount' => Cart::instance('sale')->discount(),
             ]);
 
