@@ -88,7 +88,7 @@
                             @foreach($quotation->quotationDetails as $item)
                                 <tr>
                                     <td class="align-middle">
-                                        {{ $item->product_name }}
+                                        {{ $item->product_name }} <br>
                                         <small>
                                                 ({{ $item->product_code }})
                                             </small>
