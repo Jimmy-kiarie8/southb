@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ public_path('b3/bootstrap.min.css') }}">
 </head>    <style>
     td {
-        font-size: 11px !important;
+        font-size: 8px !important;
     }
 </style>
 <body>
