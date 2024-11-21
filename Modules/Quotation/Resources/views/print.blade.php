@@ -127,13 +127,13 @@
                                 <tr>
                                     <td class="left"><strong>Net Total</strong></td>
                                     <td class="right">
-                                        {{ format_currency($quotation->total_amount - ($quotation->total_amount - $quotation->total_amount / 1.16)) }}
+                                        {{ format_currency($quotation->total_amount) }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class="left"><strong>Tax</strong></td>
                                     <td class="right">
-                                        {{ format_currency($quotation->total_amount - $quotation->total_amount / 1.16) }}
+                                        {{ format_currency($quotation->total_amount*1.16 - $quotation->total_amount) }}
                                     </td>
                                 </tr>
                                  {{-- <tr>
@@ -142,7 +142,11 @@
                                 </tr> --}}
                                 <tr>
                                     <td class="left"><strong>Total</strong></td>
-                                    <td class="right"><strong>{{ format_currency($quotation->total_amount) }}</strong></td>
+                                    <td class="right"><strong>
+                                        {{ format_currency($quotation->total_amount*1.16) }}
+
+                                    </strong>
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
