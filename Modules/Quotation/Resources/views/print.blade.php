@@ -16,11 +16,12 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12">
-            <div style="text-align: center;margin-bottom: 25px;">
-                <img width="100" src="{{ public_path('images/logo/logo.png') }}" alt="Logo">
-                <h4 style="margin-bottom: 20px;">
+            <div style="text-align: center;">
+                <img width="130" src="{{ public_path('images/logo/logo.png') }}" alt="Logo">
+                <b style="">
+                    <br>
                     <span>Reference::</span> <strong>{{ $quotation->reference }}</strong>
-                </h4>
+                </b>
             </div>
             <div class="card">
                 <div class="card-body">
@@ -78,7 +79,7 @@
                                 <th class="align-middle">Unit Price</th>
                                 <th class="align-middle">Quantity</th>
                                 <th class="align-middle">Discount</th>
-                                {{-- <th class="align-middle">Tax</th> --}}
+                                <th class="align-middle">Tax</th>
                                 <th class="align-middle">Total</th>
                             </tr>
                             </thead>
@@ -86,9 +87,9 @@
                             @foreach($quotation->quotationDetails as $item)
                                 <tr>
                                     <td class="align-middle">
-                                        {{ $item->product_name }} <br>
+                                        {{ $item->product_name }}
                                         <small>
-                                                {{ $item->product_code }}
+                                                ({{ $item->product_code }})
                                             </small>
                                     </td>
 
@@ -102,9 +103,9 @@
                                         {{ format_currency($item->product_discount_amount) }}
                                     </td>
 
-                                    {{-- <td class="align-middle">
+                                    <td class="align-middle">
                                         {{ format_currency($item->product_tax_amount) }}
-                                    </td> --}}
+                                    </td>
 
                                     <td class="align-middle">
                                         {{ format_currency($item->unit_price * $item->quantity) }}
@@ -121,12 +122,20 @@
                                 {{-- <tr>
                                     <td class="left"><strong>Discount ({{ $quotation->discount_percentage }}%)</strong></td>
                                     <td class="right">{{ format_currency($quotation->discount_amount) }}</td>
+                                </tr>--}}
+                                <tr>
+                                    <td class="left"><strong>Net Total</strong></td>
+                                    <td class="right">
+                                        {{ format_currency($quotation->total_amount - ($quotation->total_amount - $quotation->total_amount / 1.16)) }}
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td class="left"><strong>Tax ({{ $quotation->tax_percentage }}%)</strong></td>
-                                    <td class="right">{{ format_currency($quotation->tax_amount) }}</td>
+                                    <td class="left"><strong>Tax</strong></td>
+                                    <td class="right">
+                                        {{ format_currency($quotation->total_amount - $quotation->total_amount / 1.16) }}
+                                    </td>
                                 </tr>
-                                <tr>
+                                 {{-- <tr>
                                     <td class="left"><strong>Shipping)</strong></td>
                                     <td class="right">{{ format_currency($quotation->shipping_amount) }}</td>
                                 </tr> --}}
