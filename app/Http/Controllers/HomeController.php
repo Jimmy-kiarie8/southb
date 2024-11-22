@@ -41,7 +41,6 @@ class HomeController extends Controller
         $revenue = ($sales - $sale_returns);
         $profit = $revenue - $product_costs;
 
-        dd($revenue, $product_costs);
 
         return view('home', [
             'revenue'          => $revenue,
