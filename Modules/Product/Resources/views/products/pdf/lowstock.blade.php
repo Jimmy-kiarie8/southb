@@ -184,7 +184,7 @@
                         {{-- &copy; {{ date('Y') }} {{ $company->name }} - All rights reserved. --}}
                     </td>
                     <td align="right" style="width: 50%;">
-                       <a href="https://hillsdatatechnologies.co.ke" style="color: #212529" target="_blank">Hills data Technologies</a>
+                       <a href="www.amrosab.com" style="color: #212529" target="_blank">Amrosab</a>
                        {{-- <a href="{{ $company->website }}" style="color: #212529" target="_blank">{{ $company->website }}</a> --}}
                     </td>
                 </tr>

@@ -16,13 +16,13 @@ class SettingDatabaseSeeder extends Seeder
     public function run()
     {
         Setting::create([
-            'company_name' => 'Hills Data Technologies POS',
-            'company_email' => 'support@hillsdatatechnologies.co.ke',
+            'company_name' => 'Amrosab POS',
+            'company_email' => 'support@www.amrosab.com',
             'company_phone' => '012345678901',
-            'notification_email' => 'support@hillsdatatechnologies.co.ke',
+            'notification_email' => 'support@www.amrosab.com',
             'default_currency_id' => 1,
             'default_currency_position' => 'prefix',
-            'footer_text' => 'LogixPos © 2022 || Developed by <strong><a target="_blank" href="https://hillsdatatechnologies.co.ke/">HillsData Technologies</a></strong>',
+            'footer_text' => 'LogixPos © 2022 || Developed by <strong><a target="_blank" href="www.amrosab.com/">HillsData Technologies</a></strong>',
             'company_address' => 'Nairobi, Kenya'
         ]);
     }
