@@ -42,7 +42,6 @@ class PurchaseController extends Controller
 
     public function store(StorePurchaseRequest $request)
     {
-        // return $request->all();
         $instances = ['purchase', 'purchases']; // Define an array of possible instances
 
         // Initialize a variable to track if there is any content in either instance
@@ -83,6 +82,8 @@ class PurchaseController extends Controller
                 }
             }
 
+            $location_id = $request->location_id ?? 1;
+
             $cart_total = 0;
             $cart_items = Cart::instance($instance)->content();
 
@@ -107,7 +108,7 @@ class PurchaseController extends Controller
             $purchase = Purchase::create([
                 'date' => $request->date,
                 'supplier_id' => $request->supplier_id,
-                'location_id' => $request->location_id,
+                'location_id' => $location_id,
                 'supplier_name' => ($request->supplier_id) ? Supplier::findOrFail($request->supplier_id)->supplier_name : 'Opening Stock',
                 'tax_percentage' => ($request->tax_percentage) ?? 16,
                 'discount_percentage' => $request->discount_percentage,
@@ -160,7 +161,7 @@ class PurchaseController extends Controller
                         // 'product_cost' => $unit_price
                     ]);
 
-                    $product_branch = ProductBranch::where('product_id', $cart_item->id)->where('branch_id', $request->location_id)->first();
+                    $product_branch = ProductBranch::where('product_id', $cart_item->id)->where('branch_id', $location_id)->first();
 
                     $quantity = $product->product_quantity + $cart_item->qty;
                     if ($product_branch) {
@@ -169,7 +170,7 @@ class PurchaseController extends Controller
                         ]);
                     } else {
                         $product_branch = new ProductBranch;
-                        $product_branch->quantity($cart_item->qty, $cart_item->id, $request->location_id);
+                        $product_branch->quantity($cart_item->qty, $cart_item->id, $location_id);
                     }
                 }
             }
@@ -193,172 +194,11 @@ class PurchaseController extends Controller
     }
 
 
-    public function store1(StorePurchaseRequest $request)
-    {
-
-        $instances = ['purchase', 'purchases']; // Define an array of possible instances
-
-        // Initialize a variable to track if there is any content in either instance
-        $isEmpty = true;
-
-        // Loop through each instance and check if it contains any content
-        foreach ($instances as $instance) {
-            if (count(Cart::instance($instance)->content()) > 0) {
-                $isEmpty = false;
-                break; // Exit loop if we find content in any instance
-            }
-        }
-
-        // If both instances are empty, redirect with an error
-        if ($isEmpty) {
-            return redirect()->back()->withErrors(['Please select a product']);
-        }
-
-        if (count(Cart::instance($instance)->content()) < 1) {
-            return redirect()->back()->withErrors(['Please select a product']);;
-        }
-
-        // return Cart::instance($instance)->content();
-        DB::transaction(function () use ($request, $instance) {
-
-            if ($request->lpo_id) {
-                $lpo = Lpo::find($request->lpo_id);
-                if ($lpo) {
-                    $lpo->update(['status' => 'Completed']);
-                }
-            }
-
-            $cart_total = 0;
-            $cart_items = Cart::instance($instance)->content();
-
-            foreach ($cart_items as $item) {
-                $cart_total += $item->price * $item->qty;
-            }
-
-
-            $due_amount = $cart_total - $request->paid_amount;
-            if ($due_amount == $cart_total) {
-                $payment_status = 'Unpaid';
-            } elseif ($due_amount > 0) {
-                $payment_status = 'Partial';
-            } else {
-                $payment_status = 'Paid';
-            }
-
-            $purchase = Purchase::create([
-                'date' => $request->date,
-                'supplier_id' => $request->supplier_id,
-                'location_id' => $request->location_id,
-                'supplier_name' => ($request->supplier_id) ? Supplier::findOrFail($request->supplier_id)->supplier_name : 'Opening Stock',
-                'tax_percentage' => ($request->tax_percentage) ? $request->tax_percentage : 0,
-                'discount_percentage' => $request->discount_percentage,
-                'shipping_amount' => $request->shipping_amount,
-                'paid_amount' => $request->paid_amount,
-                'total_amount' => $cart_total,
-                // 'total_amount' => $request->total_amount,
-                'due_amount' => $due_amount,
-                'status' => $request->status,
-                'payment_status' => $payment_status,
-                'is_openingstock' => ($request->stock_type == 'receipt') ? false : true,
-                'payment_method' => $request->payment_method,
-                'note' => $request->note,
-                'tax_amount' => Cart::instance($instance)->tax(),
-                'discount_amount' => Cart::instance($instance)->discount(),
-            ]);
-
-
-            foreach (Cart::instance($instance)->content() as $cart_item) {
-                $saleType = 'Retail';
-
-                Log::alert($cart_item);
-
-                if (env('WHOLESALE_RETAIL')) {
-                    $saleType = $request->saleType[$cart_item->id];
-                }
-
-                if ($saleType == 'Wholesale') {
-                    $product = Product::findOrFail($cart_item->id);
-                    $factor = $product->factor;
-
-                    if ($factor) {
-                        $sell_qty = ($cart_item->qty * (int)$factor);
-                        $unit_price = $cart_item->price / (int)$factor;
-                    }
-                } else {
-                    $sell_qty = $cart_item->qty;
-                    $unit_price = $cart_item->options->unit_price;
-                }
-                PurchaseDetail::create([
-                    'reference' => $purchase->reference,
-                    'purchase_id' => $purchase->id,
-                    'product_id' => $cart_item->id,
-                    'product_name' => $cart_item->name,
-                    'product_code' => $cart_item->options->code,
-                    'sale_type' => $saleType,
-                    'quantity' => $sell_qty,
-                    'price' => $unit_price,
-                    'unit_price' => $unit_price,
-                    'sub_total' => $unit_price * $sell_qty,
-                    'product_discount_amount' => $cart_item->options->product_discount,
-                    'product_discount_type' => $cart_item->options->product_discount_type,
-                    'product_tax_amount' => $cart_item->options->product_tax,
-                ]);
-
-
-                if ($request->status == 'Completed') {
-                    $product = Product::findOrFail($cart_item->id);
-                    $product->update([
-                        'product_quantity' => $product->product_quantity + $cart_item->qty,
-                        // 'product_cost' => $unit_price
-                    ]);
-
-                    $product_branch = ProductBranch::where('product_id', $cart_item->id)->where('branch_id', $request->location_id)->first();
-
-
-                    if ($saleType == 'Wholesale') {
-                        $product = Product::findOrFail($cart_item->id);
-                        $factor = $product->factor;
-
-                        if ($factor) {
-                            $quantity = $product->product_quantity + ($cart_item->qty * (int)$factor);
-                        }
-                    } else {
-                        $quantity = $product->product_quantity + $cart_item->qty;
-                    }
-
-                    if ($product_branch) {
-                        $product_branch->update([
-                            'quantity' => $quantity
-                        ]);
-                    } else {
-                        $product_branch = new ProductBranch;
-                        $product_branch->quantity($cart_item->qty, $cart_item->id, $request->location_id);
-                    }
-                }
-            }
-
-            Cart::instance($instance)->destroy();
-
-            if ($purchase->paid_amount > 0) {
-                PurchasePayment::create([
-                    'date' => $request->date,
-                    'reference' => 'INV/' . $purchase->reference,
-                    'amount' => $purchase->paid_amount,
-                    'purchase_id' => $purchase->id,
-                    'payment_method' => $request->payment_method
-                ]);
-            }
-        });
-
-        toast('Purchase Created!', 'success');
-
-        return redirect()->route('purchases.index');
-    }
-
-
     public function show(Purchase $purchase)
     {
+        // return $purchase;
         abort_if(Gate::denies('show_purchases'), 403);
+         Purchase::with('purchaseDetails')->find($purchase->id);
 
         $supplier = Supplier::find($purchase->supplier_id);
 

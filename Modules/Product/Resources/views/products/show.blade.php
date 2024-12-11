@@ -92,10 +92,10 @@
                         <table class="table table-bordered table-striped mb-0">
                             <thead>
                                 <tr>
-
+                                    <th>#</th>
                                     <th>Location</th>
-                                    <th>Last updated at</th>
                                     <th>Quantity</th>
+                                    <th>Last updated at</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -104,7 +104,7 @@
                                         <th scope="row">1</th>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->pivot->quantity. ' ' . $product->product_unit }}</td>
-                                        <td>{{ $item->updated_at }}</td>
+                                        <td>{{ $product->updated_at }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

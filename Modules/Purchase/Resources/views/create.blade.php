@@ -169,7 +169,7 @@
                                             <label for="paid_amount">Amount Paid <span
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
-                                                <input id="paid_amount" type="text" class="form-control"
+                                                <input type="text" class="form-control"
                                                     name="paid_amount" value="0" required>
                                                 <div class="input-group-append">
                                                     <button id="getTotalAmount" class="btn btn-primary" type="button">

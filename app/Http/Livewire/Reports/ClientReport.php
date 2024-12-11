@@ -73,7 +73,7 @@ class ClientReport extends Component
 
             $sales = Sale::with(['saleDetails'])->whereDate('date', '>=', $this->start_date)
                 ->whereDate('date', '<=', $this->end_date)
-                ->when($customer_code, function ($query) use($customer_code) {
+                ->when($customer_code, function ($query) use ($customer_code) {
                     return $query->where('clientcode', $customer_code);
                 })
                 ->orderBy('date', 'desc')->paginate(10);
@@ -105,9 +105,9 @@ class ClientReport extends Component
         // dd($company->site_logo);
         $customer = Customer::find($this->customer_id)->customer_name;
 
-        $pdfContent = PDF::loadView('reports::pdf.customer', ['data' => $data['sales'], 'company' =>  $company , 'sumSales' => $data['sumSales'], 'sumPayments' => $data['sumPayments'], 'difference' => $data['difference'], 'start_date' => $this->start_date, 'end_date' => $this->end_date, 'running_balance' => $data['running_balance'], 'customer_name' => $customer])->output();
+        $pdfContent = PDF::loadView('reports::pdf.customer', ['data' => $data['sales'], 'company' =>  $company, 'sumSales' => $data['sumSales'], 'sumPayments' => $data['sumPayments'], 'difference' => $data['difference'], 'start_date' => $this->start_date, 'end_date' => $this->end_date, 'running_balance' => $data['running_balance'], 'customer_name' => $customer])->output();
         return response()->streamDownload(
-            fn () => print($pdfContent),
+            fn() => print($pdfContent),
             Carbon::now() . '-sales.pdf'
         );
 
@@ -124,11 +124,11 @@ class ClientReport extends Component
             $customer_code = $customer->code;
         }
         // Retrieve sales
-        $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use($customer_code) {
+        $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code) {
             return $query->where('clientcode', $customer_code);
         })
-        // ->where('customer_id', $this->customer_id)
-        ->get();
+            // ->where('customer_id', $this->customer_id)
+            ->get();
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
             return $payment;
@@ -151,19 +151,19 @@ class ClientReport extends Component
 
 
 
-        $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)->whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use($customer_code) {
+        $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)->whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code) {
             return $query->where('customer_code', $customer_code);
         })->get();
 
 
         // Retrieve payments
-        $payments = SalePayment::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use($customer_code) {
+        $payments = SalePayment::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code) {
             return $query->where('customer_code', $customer_code);
         })->get();
 
         $payments->transform(function ($payment) use ($customer) {
             $payment->type = 'Payment';
-            $payment->customer_name = ($customer) ? $customer->customer_name :'';
+            $payment->customer_name = ($customer) ? $customer->customer_name : '';
             $payment->paid_amount = $payment->amount;
             $payment->payment_code = $payment->note;
             return $payment;
@@ -200,14 +200,16 @@ class ClientReport extends Component
         $difference = $this->balance();
         // $difference = $sumSales - $sumPayments;
 
+        $startDate = Carbon::parse($this->start_date)->startOfDay();
 
-        $bulk_ref = SaleBulkPayment::whereDate('date', '<',$this->start_date)->where('client_id', $this->customer_id)->pluck('reference');
 
-        $purchase_balance = Sale::whereDate('date', '<', $this->start_date)->where('clientcode', $customer_code)->sum('total_amount');
-        $bulk_sum = SaleBulkPayment::whereDate('date', '<',$this->start_date)->where('client_id', $this->customer_id)->sum('amount');
-        $payment_sum = SalePayment::whereNotIn('reference', $bulk_ref)->whereDate('date', '<',$this->start_date)->where('customer_code', $customer_code)->sum('amount');
+        $bulk_ref = SaleBulkPayment::whereDate('date', '<=', $startDate)->where('client_id', $this->customer_id)->pluck('reference');
 
-        $running_balance = $purchase_balance - ($bulk_sum + $payment_sum);
+        $sale_balance = Sale::whereDate('date', '<=', $startDate)->where('clientcode', $customer_code)->where('payment_status', '!=', 'Paid')->sum('total_amount');
+        $bulk_sum = SaleBulkPayment::whereDate('date', '<=', $startDate)->where('client_id', $this->customer_id)->sum('amount');
+        $payment_sum = SalePayment::whereNotIn('reference', $bulk_ref)->whereDate('date', '<', $startDate)->where('customer_code', $customer_code)->sum('amount');
+
+        $running_balance = $sale_balance - ($bulk_sum + $payment_sum);
 
 
         // $sale = Sale::sum('total_amount');
@@ -216,7 +218,6 @@ class ClientReport extends Component
 
         // $cum_total = $sale - $sum_bulk - $sum;
         return array('sales' => $sorted, 'sumSales' => $sumSales, 'sumPayments' => $sumPayments, 'difference' => $difference, 'running_balance' => $running_balance);
-
     }
 
 
@@ -230,11 +231,11 @@ class ClientReport extends Component
             $customer_code = $customer->code;
         }
         // Retrieve sales
-        $sales = Sale::when($customer_code, function ($query) use($customer_code) {
+        $sales = Sale::when($customer_code, function ($query) use ($customer_code) {
             return $query->where('clientcode', $customer_code);
         })
-        // ->where('customer_id', $this->customer_id)
-        ->get();
+            // ->where('customer_id', $this->customer_id)
+            ->get();
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
             return $payment;
