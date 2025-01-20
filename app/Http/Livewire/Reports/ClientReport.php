@@ -140,6 +140,9 @@ class ClientReport extends Component
                 });
             })
             ->get();
+
+
+
             // ->where('customer_id', $this->customer_id)
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
@@ -223,6 +226,9 @@ class ClientReport extends Component
                 ->orWhere('customer_id', $customer->id);
             });
         })->sum('total_amount');
+
+        // $sale_balance = $sales->sum('total_amount');
+
         $running_balance = $sale_balance - ($bulk_sum + $payment_sum);
 
 
@@ -249,6 +255,7 @@ class ClientReport extends Component
         $sales = Sale::when($customer_code, function ($query) use ($customer_code) {
             return $query->where('clientcode', $customer_code);
         })
+        ->where('payment_status', '!=', 'Paid')
             // ->where('customer_id', $this->customer_id)
             ->get();
         $sales->transform(function ($payment) {
