@@ -255,7 +255,7 @@ class ClientReport extends Component
         $sales = Sale::when($customer_code, function ($query) use ($customer_code) {
             return $query->where('clientcode', $customer_code);
         })
-        ->where('payment_status', '!=', 'Paid')
+        // ->where('payment_status', '!=', 'Paid')
             // ->where('customer_id', $this->customer_id)
             ->get();
         $sales->transform(function ($payment) {
@@ -314,7 +314,7 @@ class ClientReport extends Component
         // Calculate the sums
         foreach ($sorted as $record) {
             if ($record instanceof Sale) {
-                $sumSales += $record->total_amount;
+                $sumSales += $record->due_amount;
             } elseif ($record instanceof SalePayment ||  $record instanceof SaleBulkPayment) {
                 $sumPayments += $record->paid_amount;
             }
