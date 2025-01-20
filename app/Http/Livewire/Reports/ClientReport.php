@@ -212,10 +212,17 @@ class ClientReport extends Component
 
         $bulk_ref = SaleBulkPayment::whereDate('date', '<=', $startDate)->where('client_id', $this->customer_id)->pluck('reference');
 
-        $sale_balance = Sale::whereDate('date', '<=', $startDate)->where('clientcode', $customer_code)->where('payment_status', '!=', 'Paid')->sum('total_amount');
+        // $sale_balance = Sale::whereDate('date', '<=', $startDate)->where('clientcode', $customer_code)->where('payment_status', '!=', 'Paid')->sum('total_amount');
         $bulk_sum = SaleBulkPayment::whereDate('date', '<=', $startDate)->where('client_id', $this->customer_id)->sum('amount');
         $payment_sum = SalePayment::whereNotIn('reference', $bulk_ref)->whereDate('date', '<', $startDate)->where('customer_code', $customer_code)->sum('amount');
 
+        $sale_balance = Sale::whereBetween('date', [$this->start_date, $this->end_date])
+        ->when($customer_code, function ($query) use ($customer_code, $customer) {
+            return $query->where(function($q) use ($customer_code, $customer) {
+                $q->where('clientcode', $customer_code)
+                ->orWhere('customer_id', $customer->id);
+            });
+        })->sum('total_amount');
         $running_balance = $sale_balance - ($bulk_sum + $payment_sum);
 
 
