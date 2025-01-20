@@ -192,19 +192,19 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="4"></th>
+                        <th colspan="6"></th>
                         <th>Sale Total</th>
                         <th colspan="3">{{ format_currency($sumSales) }}</th>
                     </tr>
 
                     <tr>
-                        <th colspan="4"></th>
+                        <th colspan="6"></th>
                         <th>Payment Total</th>
                         <th colspan="3">{{ format_currency($sumPayments) }}</th>
                     </tr>
 
                     <tr>
-                        <th colspan="4"></th>
+                        <th colspan="6"></th>
                         <th>Balance</th>
                         <th colspan="3">{{ format_currency($sumSales - $sumPayments + $running_balance) }}</th>
                     </tr>
