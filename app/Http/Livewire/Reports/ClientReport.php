@@ -124,11 +124,13 @@ class ClientReport extends Component
             $customer_code = $customer->code;
         }
         // Retrieve sales
+        DB::enableQueryLog();
         $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code, $customer) {
             return $query->where('clientcode', $customer_code)->orWhere('customer_id', $customer->id);
         })
             // ->where('customer_id', $this->customer_id)
             ->get();
+        Log::debug(DB::getQueryLog());
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
             return $payment;
