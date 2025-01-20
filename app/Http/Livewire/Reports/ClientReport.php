@@ -79,6 +79,9 @@ class ClientReport extends Component
                         ->orWhere('customer_id', $customer->id);
                     });
                 })
+                ->when($this->payment_status, function ($query) {
+                    return $query->where('payment_status', $this->payment_status);
+                })
                 ->orderBy('date', 'desc')->paginate(10);
         }
 
@@ -127,6 +130,9 @@ class ClientReport extends Component
                     $q->where('clientcode', $customer_code)
                       ->orWhere('customer_id', $customer->id);
                 });
+            })
+            ->when($this->payment_status, function ($query) {
+                return $query->where('payment_status', $this->payment_status);
             })
             ->get();
 
@@ -227,6 +233,8 @@ class ClientReport extends Component
                 $q->where('clientcode', $customer_code)
                 ->orWhere('customer_id', $customer->id);
             });
+        })->when($this->payment_status, function ($query) {
+            return $query->where('payment_status', $this->payment_status);
         })
             ->get();
         $sales->transform(function ($payment) {

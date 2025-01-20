@@ -44,8 +44,10 @@
                                     <label>Status</label>
                                     <select wire:model.defer="report_type" class="form-control" name="report_type">
                                         <option value="">Select type</option>
-                                        <option value="Sale">Sale</option>
-                                        <option value="Payments">Payments</option>
+                                        <option value="Paid">Paid</option>
+                                        <option value="Credit">Credit</option>
+                                        <option value="Partial">Partial</option>
+                                        <option value="Unpaid">Unpaid</option>
                                     </select>
                                 </div>
                             </div>
