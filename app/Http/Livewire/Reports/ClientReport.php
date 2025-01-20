@@ -73,8 +73,11 @@ class ClientReport extends Component
 
             $sales = Sale::with(['saleDetails'])->whereDate('date', '>=', $this->start_date)
                 ->whereDate('date', '<=', $this->end_date)
-                ->when($customer_code, function ($query) use ($customer_code) {
-                    return $query->where('clientcode', $customer_code);
+                ->when($customer_code, function ($query) use ($customer_code, $customer) {
+                    return $query->where(function($q) use ($customer_code, $customer) {
+                        $q->where('clientcode', $customer_code)
+                        ->orWhere('customer_id', $customer->id);
+                    });
                 })
                 ->orderBy('date', 'desc')->paginate(10);
         }
