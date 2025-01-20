@@ -124,13 +124,21 @@ class ClientReport extends Component
             $customer_code = $customer->code;
         }
         // Retrieve sales
-        DB::enableQueryLog();
-        $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code, $customer) {
-            return $query->where('clientcode', $customer_code)->orWhere('customer_id', $customer->id);
-        })
-            // ->where('customer_id', $this->customer_id)
+        // DB::enableQueryLog();
+        // $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code, $customer) {
+        //     return $query->where('clientcode', $customer_code)->orWhere('customer_id', $customer->id);
+        // })
+
+        $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])
+            ->when($customer_code, function ($query) use ($customer_code, $customer) {
+                return $query->where(function($q) use ($customer_code, $customer) {
+                    $q->where('clientcode', $customer_code)
+                    ->orWhere('customer_id', $customer->id);
+                });
+            })
             ->get();
-        Log::debug(DB::getQueryLog());
+            // ->where('customer_id', $this->customer_id)
+        // Log::debug($sales);
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
             return $payment;
@@ -172,11 +180,6 @@ class ClientReport extends Component
         });
 
 
-        // dd($sales, $payments);
-        // $combined = $sales->concat($payments);
-        // $sorted = $combined->sortBy('date');
-
-        // dd($purchases, $payments);
         $combined = $sales->concat($payments);
 
 
