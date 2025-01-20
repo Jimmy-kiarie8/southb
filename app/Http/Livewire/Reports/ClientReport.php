@@ -138,7 +138,6 @@ class ClientReport extends Component
             })
             ->get();
             // ->where('customer_id', $this->customer_id)
-        Log::debug($sales);
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
             return $payment;
@@ -217,7 +216,6 @@ class ClientReport extends Component
         $running_balance = $sale_balance - ($bulk_sum + $payment_sum);
 
 
-        Log::debug($sorted);
 
         // $sale = Sale::sum('total_amount');
         // $sum_bulk = SaleBulkPayment::sum('amount');
