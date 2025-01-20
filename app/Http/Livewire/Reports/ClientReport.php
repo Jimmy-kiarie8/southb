@@ -200,7 +200,7 @@ class ClientReport extends Component
         // Calculate the sums
         foreach ($sorted as $record) {
             if ($record instanceof Sale) {
-                $sumSales += $record->total_amount;
+                $sumSales += $record->due_amount;
             } elseif ($record instanceof SalePayment ||  $record instanceof SaleBulkPayment) {
                 $sumPayments += $record->paid_amount;
             }
