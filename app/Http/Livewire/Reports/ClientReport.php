@@ -114,45 +114,31 @@ class ClientReport extends Component
             Carbon::now() . '-sales.pdf'
         );
 
-        // $pdf = PDF::loadView('reports::pdf.sales', ['data' => $data, 'company' =>  $company]);
-        // return $pdf->stream(Carbon::now() . '-sales.pdf');
     }
 
     public function query()
     {
         $customer = Customer::find($this->customer_id);
-        // Log::debug($this->customer_id);
-        $customer_code = null;
-        if ($customer) {
-            $customer_code = $customer->code;
-        }
-        // Retrieve sales
-        // DB::enableQueryLog();
-        // $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code, $customer) {
-        //     return $query->where('clientcode', $customer_code)->orWhere('customer_id', $customer->id);
-        // })
+        $customer_code = $customer ? $customer->code : null;
 
         $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])
             ->when($customer_code, function ($query) use ($customer_code, $customer) {
                 return $query->where(function($q) use ($customer_code, $customer) {
                     $q->where('clientcode', $customer_code)
-                    ->orWhere('customer_id', $customer->id);
+                      ->orWhere('customer_id', $customer->id);
                 });
             })
             ->get();
 
-
-
-            // ->where('customer_id', $this->customer_id)
-        $sales->transform(function ($payment) {
-            $payment->type = 'Sale';
-            return $payment;
+        $sales->transform(function ($sale) {
+            $sale->type = 'Sale';
+            $sale->total_amount = $sale->total_amount; // Ensure total_amount is set
+            return $sale;
         });
 
-
-
-        $bulk_payments = SaleBulkPayment::whereBetween('date', [$this->start_date, $this->end_date])->where('client_id', $this->customer_id)->get();
-
+        $bulk_payments = SaleBulkPayment::whereBetween('date', [$this->start_date, $this->end_date])
+            ->where('client_id', $this->customer_id)
+            ->get();
 
         $bulk_payments->transform(function ($payment) use ($customer) {
             $payment->type = 'Payment';
@@ -161,87 +147,71 @@ class ClientReport extends Component
             return $payment;
         });
 
-
         $bulk_payments_ids = $bulk_payments->pluck('reference')->toArray();
 
-
-
-        $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)->whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code) {
-            return $query->where('customer_code', $customer_code);
-        })->get();
-
-
-        // Retrieve payments
-        $payments = SalePayment::whereBetween('date', [$this->start_date, $this->end_date])->when($customer_code, function ($query) use ($customer_code) {
-            return $query->where('customer_code', $customer_code);
-        })->get();
+        $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)
+            ->whereBetween('date', [$this->start_date, $this->end_date])
+            ->when($customer_code, function ($query) use ($customer_code) {
+                return $query->where('customer_code', $customer_code);
+            })
+            ->get();
 
         $payments->transform(function ($payment) use ($customer) {
             $payment->type = 'Payment';
-            $payment->customer_name = ($customer) ? $customer->customer_name : '';
+            $payment->customer_name = $customer ? $customer->customer_name : '';
             $payment->paid_amount = $payment->amount;
             $payment->payment_code = $payment->note;
             return $payment;
         });
 
-
         $combined = $sales->concat($payments);
-
-
         $data_items = $bulk_payments->concat($combined);
-
         $sorted = $data_items->sortBy('date');
 
+        $sumSales = $sales->sum('total_amount');
+        $sumPayments = $payments->sum('paid_amount') + $bulk_payments->sum('paid_amount');
 
-        // Initialize variables for sum of sales and sum of payments
-        $sumSales = 0;
-        $sumPayments = 0;
+        $difference = $sumSales - $sumPayments;
 
-        // Calculate the sums
-        foreach ($sorted as $record) {
-            if ($record instanceof Sale) {
-                $sumSales += $record->total_amount;
-            } elseif ($record instanceof SalePayment ||  $record instanceof SaleBulkPayment) {
-                $sumPayments += $record->paid_amount;
-            }
-        }
+        $running_balance = $this->calculateRunningBalance($customer_code, $customer);
 
-        // Calculate the difference
-        $difference = $this->balance();
-        // $difference = $sumSales - $sumPayments;
-
-        $startDate = Carbon::parse($this->start_date)->startOfDay();
-
-
-        $bulk_ref = SaleBulkPayment::whereDate('date', '<=', $startDate)->where('client_id', $this->customer_id)->pluck('reference');
-
-        // $sale_balance = Sale::whereDate('date', '<=', $startDate)->where('clientcode', $customer_code)->where('payment_status', '!=', 'Paid')->sum('total_amount');
-        $bulk_sum = SaleBulkPayment::whereDate('date', '<=', $startDate)->where('client_id', $this->customer_id)->sum('amount');
-        $payment_sum = SalePayment::whereNotIn('reference', $bulk_ref)->whereDate('date', '<', $startDate)->where('customer_code', $customer_code)->sum('amount');
-
-        $sale_balance = Sale::whereBetween('date', [$this->start_date, $this->end_date])
-        ->when($customer_code, function ($query) use ($customer_code, $customer) {
-            return $query->where(function($q) use ($customer_code, $customer) {
-                $q->where('clientcode', $customer_code)
-                ->orWhere('customer_id', $customer->id);
-            });
-        })->sum('total_amount');
-
-        // $sale_balance = $sales->sum('total_amount');
-
-        $running_balance = $sale_balance - ($bulk_sum + $payment_sum);
-
-
-
-        // $sale = Sale::sum('total_amount');
-        // $sum_bulk = SaleBulkPayment::sum('amount');
-        // $sum = SalePayment::sum('amount');
-
-        // $cum_total = $sale - $sum_bulk - $sum;
-        return array('sales' => $sorted, 'sumSales' => $sumSales, 'sumPayments' => $sumPayments, 'difference' => $difference, 'running_balance' => $running_balance);
+        return [
+            'sales' => $sorted,
+            'sumSales' => $sumSales,
+            'sumPayments' => $sumPayments,
+            'difference' => $difference,
+            'running_balance' => $running_balance
+        ];
     }
 
+    private function calculateRunningBalance($customer_code, $customer)
+    {
+        $startDate = Carbon::parse($this->start_date)->startOfDay();
 
+        $bulk_ref = SaleBulkPayment::whereDate('date', '<=', $startDate)
+            ->where('client_id', $this->customer_id)
+            ->pluck('reference');
+
+        $bulk_sum = SaleBulkPayment::whereDate('date', '<=', $startDate)
+            ->where('client_id', $this->customer_id)
+            ->sum('amount');
+
+        $payment_sum = SalePayment::whereNotIn('reference', $bulk_ref)
+            ->whereDate('date', '<', $startDate)
+            ->where('customer_code', $customer_code)
+            ->sum('amount');
+
+        $sale_balance = Sale::whereBetween('date', [$this->start_date, $this->end_date])
+            ->when($customer_code, function ($query) use ($customer_code, $customer) {
+                return $query->where(function($q) use ($customer_code, $customer) {
+                    $q->where('clientcode', $customer_code)
+                      ->orWhere('customer_id', $customer->id);
+                });
+            })
+            ->sum('total_amount');
+
+        return $sale_balance - ($bulk_sum + $payment_sum);
+    }
 
     public function balance()
     {
@@ -258,8 +228,6 @@ class ClientReport extends Component
                 ->orWhere('customer_id', $customer->id);
             });
         })
-        // ->where('payment_status', '!=', 'Paid')
-            // ->where('customer_id', $this->customer_id)
             ->get();
         $sales->transform(function ($payment) {
             $payment->type = 'Sale';
@@ -286,8 +254,6 @@ class ClientReport extends Component
         $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)->where('customer_code', $customer_code)->get();
 
 
-        // Retrieve payments
-        // $payments = SalePayment::where('customer_code', $customer_code)->get();
 
         $payments->transform(function ($payment) use ($customer) {
             $payment->type = 'Payment';
@@ -297,9 +263,6 @@ class ClientReport extends Component
             return $payment;
         });
 
-        // dd($sales, $payments);
-        // $combined = $sales->concat($payments);
-        // $sorted = $combined->sortBy('date');
 
         // dd($purchases, $payments);
         $combined = $sales->concat($payments);

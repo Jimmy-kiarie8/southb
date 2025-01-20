@@ -169,7 +169,7 @@
                             if ($report->type == 'Sale') {
                                 $run_bal += $report->total_amount;
                             } elseif ($report->type == 'Payment') {
-                                $run_bal -= $report->amount;
+                                $run_bal -= $report->paid_amount;
                             }
                         @endphp
                         <tr>
@@ -178,7 +178,6 @@
                             <td>{{ $report->type }}</td>
                             <td>{{ $report->reference }}</td>
                             <td>{{ $report->payment_code }}</td>
-                            {{-- <td>{{ $report->customer_name }}</td> --}}
                             <td>{{ format_currency($report->total_amount) }}</td>
                             <td>
                                 @if ($report->type == 'Sale')
@@ -209,11 +208,6 @@
                         <th>Balance</th>
                         <th colspan="3">{{ format_currency($difference) }}</th>
                     </tr>
-                    {{-- <tr>
-                        <th colspan="4"></th>
-                        <th>Cumulative Total</th>
-                        <th colspan="3">{{ format_currency($cum_total) }}</th>
-                    </tr> --}}
                 </tfoot>
             </table>
         </div>
@@ -222,12 +216,10 @@
             <table width="100%" class="table table-striped">
                 <tr>
                     <td align="left" style="width: 50%;">
-                        {{-- &copy; {{ date('Y') }} {{ $company->name }} - All rights reserved. --}}
                     </td>
                     <td align="right" style="width: 50%;">
                         <a href="www.amrosab.com" style="color: #212529"
                             target="_blank">www.amrosab.com</a>
-                        {{-- <a href="{{ $company->website }}" style="color: #212529" target="_blank">{{ $company->website }}</a> --}}
                     </td>
                 </tr>
 
