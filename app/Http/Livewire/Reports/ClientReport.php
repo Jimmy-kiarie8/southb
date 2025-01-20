@@ -174,7 +174,8 @@ class ClientReport extends Component
         $sorted = $data_items->sortBy('date');
 
         $sumSales = $sales->sum('total_amount');
-        $sumPayments = $payments->sum('paid_amount') + $bulk_payments->sum('paid_amount');
+        $sumPayments = $payments->sum('paid_amount');
+        // $sumPayments = $payments->sum('paid_amount') + $bulk_payments->sum('paid_amount');
 
         $difference = $sumSales - $sumPayments;
 
@@ -204,26 +205,28 @@ class ClientReport extends Component
         // Calculate total sales
         $total_sales = Sale::where($customerConditions)
             ->whereDate('date', '<', $startDate)
-            ->where('status', '!=', 'Paid')
+            // ->where('status', '!=', 'Paid')
             ->sum('total_amount');
 
         // Calculate payments using the same customer identification logic
         $total_payments = $this->calculateTotalPayments($customer_code, $customer, $startDate);
 
+        Log::info('total_sales: ' . $total_sales);
+        Log::info('total_payments: ' . $total_payments);
         return $total_sales - $total_payments;
     }
 
     private function calculateTotalPayments($customer_code, $customer, $startDate)
     {
-        $bulk_payments = SaleBulkPayment::whereDate('date', '<', $startDate)
-            // ->where('client_id', $customer->id)  // Use consistent ID
-            ->sum('amount');
+        // $bulk_payments = SaleBulkPayment::whereDate('date', '<', $startDate)
+        //     ->where('client_id', $customer->id)  // Use consistent ID
+        //     ->sum('amount');
 
         $individual_payments = SalePayment::whereDate('date', '<', $startDate)
-            // ->where('customer_code', $customer_code)
+            ->where('customer_code', $customer_code)
             ->sum('amount');
 
-        return $bulk_payments + $individual_payments;
+        return $individual_payments;
     }
 
 
