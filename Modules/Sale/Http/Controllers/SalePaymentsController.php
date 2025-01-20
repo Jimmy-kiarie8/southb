@@ -63,16 +63,17 @@ class SalePaymentsController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
+            $sale = Sale::findOrFail($request->sale_id);
             SalePayment::create([
                 'date' => $request->date,
                 'reference' => $request->reference,
                 'amount' => $request->amount,
                 'note' => $request->note,
                 'sale_id' => $request->sale_id,
+                'customer_code' => $sale->clientcode,
                 'payment_method' => $request->payment_method
             ]);
 
-            $sale = Sale::findOrFail($request->sale_id);
 
             $due_amount = $sale->due_amount - $request->amount;
 
