@@ -200,7 +200,7 @@ class ClientReport extends Component
         // Calculate the sums
         foreach ($sorted as $record) {
             if ($record instanceof Sale) {
-                $sumSales += $record->due_amount;
+                $sumSales += $record->total_amount;
             } elseif ($record instanceof SalePayment ||  $record instanceof SaleBulkPayment) {
                 $sumPayments += $record->paid_amount;
             }
@@ -252,8 +252,11 @@ class ClientReport extends Component
             $customer_code = $customer->code;
         }
         // Retrieve sales
-        $sales = Sale::when($customer_code, function ($query) use ($customer_code) {
-            return $query->where('clientcode', $customer_code);
+        $sales = Sale::when($customer_code, function ($query) use ($customer_code, $customer) {
+            return $query->where(function($q) use ($customer_code, $customer) {
+                $q->where('clientcode', $customer_code)
+                ->orWhere('customer_id', $customer->id);
+            });
         })
         // ->where('payment_status', '!=', 'Paid')
             // ->where('customer_id', $this->customer_id)
@@ -284,7 +287,7 @@ class ClientReport extends Component
 
 
         // Retrieve payments
-        $payments = SalePayment::where('customer_code', $customer_code)->get();
+        // $payments = SalePayment::where('customer_code', $customer_code)->get();
 
         $payments->transform(function ($payment) use ($customer) {
             $payment->type = 'Payment';
@@ -314,7 +317,7 @@ class ClientReport extends Component
         // Calculate the sums
         foreach ($sorted as $record) {
             if ($record instanceof Sale) {
-                $sumSales += $record->due_amount;
+                $sumSales += $record->total_amount;
             } elseif ($record instanceof SalePayment ||  $record instanceof SaleBulkPayment) {
                 $sumPayments += $record->paid_amount;
             }
