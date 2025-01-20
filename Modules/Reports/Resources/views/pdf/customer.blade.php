@@ -206,7 +206,7 @@
                     <tr>
                         <th colspan="4"></th>
                         <th>Balance</th>
-                        <th colspan="3">{{ format_currency($sumSales + $sumPayments - $running_balance) }}</th>
+                        <th colspan="3">{{ format_currency($sumSales - $sumPayments + $running_balance) }}</th>
                     </tr>
                 </tfoot>
             </table>
