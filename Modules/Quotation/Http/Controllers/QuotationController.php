@@ -94,8 +94,6 @@ class QuotationController extends Controller
         $cart = Cart::instance('quotation');
 
         foreach ($quotation_details as $quotation_detail) {
-            $product = Product::find($quotation_detail->product_id);
-            
             $cart->add([
                 'id'      => $quotation_detail->product_id,
                 'name'    => $quotation_detail->product_name,
@@ -107,7 +105,7 @@ class QuotationController extends Controller
                     'product_discount_type' => $quotation_detail->product_discount_type,
                     'sub_total'   => $quotation_detail->sub_total,
                     'code'        => $quotation_detail->product_code,
-                    'stock'       => ($product) ? $product->product_quantity : 0,
+                    'stock'       => Product::find($quotation_detail->product_id)->product_quantity,
                     'product_tax' => $quotation_detail->product_tax_amount,
                     'unit_price'  => $quotation_detail->unit_price
                 ]
