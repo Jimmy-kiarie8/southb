@@ -21,7 +21,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/stocklevel', 'StocksheetController@stocklevel')->name('stocksheet.level');
         Route::post('/closingstock', 'StocksheetController@closingStock')->name('stocksheet.closing');
         Route::get('/filter', 'StocksheetController@filter')->name('stocksheet.filter');
-
+        Route::get('/debug-product', 'StocksheetController@debugProduct')->name('stocksheet.debug-product');
     });
 
     Route::resource('stocksheet', 'StocksheetController');

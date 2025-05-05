@@ -156,8 +156,8 @@
                         <td>{{ $product->product_code }}</td>
                         <td>{{ format_currency($product->product_cost) }}</td>
                         <td>{{ format_currency($product->product_price) }}</td>
-                        <td>{{ $product->product_quantity . ' ' . $product->product_unit }}</td>
-                        <td>{{ format_currency($product->product_quantity * $product->product_cost) }}</td>
+                        <td>{{ $product->qty . ' ' . $product->product_unit }}</td>
+                        <td>{{ format_currency($product->qty * $product->product_cost) }}</td>
                     </tr>
                     @endforeach
                 </tbody>
