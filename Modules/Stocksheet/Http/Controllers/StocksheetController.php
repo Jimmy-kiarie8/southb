@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StocksheetController extends Controller
 {
@@ -222,6 +223,8 @@ class StocksheetController extends Controller
         $company = Setting::first();
         $directory = public_path('stocklevels');
         $timestamp = date('Ymd_His'); // Get the current date in 'YYYYMMDD_HHMMSS' format
+
+        Log::info($request->as_of_date);
         $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
 
         if (!File::exists($directory)) {
