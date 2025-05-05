@@ -326,6 +326,7 @@ class StocksheetController extends Controller
         Log::info('As of: ',$request->as_of_date);
         Log::info('Date: ',$asOfDate);
 
+
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
