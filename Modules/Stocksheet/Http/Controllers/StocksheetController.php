@@ -323,7 +323,7 @@ class StocksheetController extends Controller
         $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
         $reportTitle = "Closing Stock as of " . Carbon::parse($asOfDate)->format('d M Y');
 
-        Log::info($request->all());
+        Log::alert($request->all());
         Log::info($asOfDate);
 
 
@@ -362,14 +362,14 @@ class StocksheetController extends Controller
                     ->join('purchases', 'purchases.id', '=', 'purchase_details.purchase_id')
                     ->where('purchase_details.product_id', $product->id)
                     ->where('purchases.status', 'Completed')
-                    ->whereDate('purchases.date', '<=', $asOfDate)
+                    ->whereDate('purchases.created_at', '<=', $asOfDate)
                     ->sum('purchase_details.quantity');
 
                 // Get all sale details for this product up to the as_of_date
                 $saleQuantity = DB::table('sale_details')
                     ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
                     ->where('sale_details.product_id', $product->id)
-                    ->whereDate('sales.date', '<=', $asOfDate)
+                    ->whereDate('sales.created_at', '<=', $asOfDate)
                     ->sum('sale_details.quantity');
 
                 // Calculate the product quantity as of the specified date
