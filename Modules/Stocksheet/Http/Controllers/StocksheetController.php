@@ -323,8 +323,8 @@ class StocksheetController extends Controller
         $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
         $reportTitle = "Closing Stock as of " . Carbon::parse($asOfDate)->format('d M Y');
 
-        Log::info('As of: ',$request->as_of_date);
-        Log::info('Date: ',$asOfDate);
+        Log::info($request->as_of_date);
+        Log::info($asOfDate);
 
 
         if (!File::exists($directory)) {
