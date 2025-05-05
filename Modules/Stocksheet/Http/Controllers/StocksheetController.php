@@ -13,6 +13,7 @@ use Modules\Stocksheet\Entities\Stocksheet;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class StocksheetController extends Controller
 {
@@ -128,6 +129,7 @@ class StocksheetController extends Controller
         $page = 1;
         $company = Setting::first();
         $directory = public_path('stockreports');
+        $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
 
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -136,19 +138,72 @@ class StocksheetController extends Controller
         $timestamp = date('Ymd_His'); // Get the current date in 'YYYYMMDD_HHMMSS' format
 
         do {
-            $data = Product::setEagerLoads([])
+            $query = Product::setEagerLoads([])
                 ->with(['branches', 'supplier'])
-                ->select('id', 'product_name', 'product_code')
+                ->select('id', 'product_name', 'product_code', 'product_quantity', 'product_cost', 'product_price', 'product_unit', 'created_at')
                 ->skip(($page - 1) * $perPage)
-                ->take($perPage)
-                ->get();
+                ->take($perPage);
+
+            // Apply location filter if provided
+            if ($request->location_id) {
+                $location_id = $request->location_id;
+                $query = $query->whereHas('branches', function($q) use ($location_id) {
+                    $q->where('branch_id', $location_id);
+                });
+            }
+
+            $data = $query->get();
+
+            // Process each product to calculate accurate stock based on purchase and sale dates
+            if ($asOfDate) {
+                foreach ($data as $product) {
+                    // First, check if the product existed before the as_of_date
+                    $productCreationDate = Carbon::parse($product->created_at);
+                    if ($productCreationDate->gt(Carbon::parse($asOfDate))) {
+                        // Product was created after the as_of_date, set quantity to 0
+                        $product->product_quantity = 0;
+                        continue;
+                    }
+
+                    // Get all purchase details for this product up to the as_of_date
+                    $purchaseQuantity = DB::table('purchase_details')
+                        ->join('purchases', 'purchases.id', '=', 'purchase_details.purchase_id')
+                        ->where('purchase_details.product_id', $product->id)
+                        ->where('purchases.status', 'Completed')
+                        ->whereDate('purchases.date', '<=', $asOfDate)
+                        ->sum('purchase_details.quantity');
+
+                    // Get all sale details for this product up to the as_of_date
+                    $saleQuantity = DB::table('sale_details')
+                        ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
+                        ->where('sale_details.product_id', $product->id)
+                        ->whereDate('sales.date', '<=', $asOfDate)
+                        ->sum('sale_details.quantity');
+
+                    // Calculate the product quantity as of the specified date
+                    $product->product_quantity = $purchaseQuantity - $saleQuantity;
+
+                    // If quantity is negative, set to 0 (might happen due to data inconsistencies)
+                    if ($product->product_quantity < 0) {
+                        $product->product_quantity = 0;
+                    }
+                }
+            }
 
             if ($data->isEmpty()) {
                 break; // No more data, exit the loop
             }
 
-            $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock', ['data' => $data, 'company' => $company]);
-            $pdfPath = $directory . '/' . 'St_stocksheet_page_' . $page . '_' . $timestamp . '.pdf'; // Filename with timestamp
+            $dateInfo = $asOfDate ? '_asof_' . Carbon::parse($asOfDate)->format('Ymd') : '';
+            $reportTitle = $asOfDate ? "Stock Sheet as of " . Carbon::parse($asOfDate)->format('d M Y') : date('D d M Y') . ' Stock Sheet';
+
+            $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock', [
+                'data' => $data,
+                'company' => $company,
+                'report_title' => $reportTitle
+            ]);
+
+            $pdfPath = $directory . '/' . 'St_stocksheet' . $dateInfo . '_page_' . $page . '_' . $timestamp . '.pdf'; // Filename with timestamp
             $pdf->save($pdfPath); // Save the PDF in the stockreports directory
 
             $page++;
@@ -160,24 +215,70 @@ class StocksheetController extends Controller
     }
 
 
-    public function stocklevel()
+    public function stocklevel(Request $request)
     {
         $perPage = 500;
         $page = 1;
         $company = Setting::first();
         $directory = public_path('stocklevels');
         $timestamp = date('Ymd_His'); // Get the current date in 'YYYYMMDD_HHMMSS' format
+        $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
 
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
         do {
-            $data = Product::setEagerLoads([])
+            $query = Product::setEagerLoads([])
                 ->with(['branches', 'supplier'])
                 ->skip(($page - 1) * $perPage)
-                ->take($perPage)
-                ->get();
+                ->take($perPage);
+
+            // Apply location filter if provided
+            if ($request->location_id) {
+                $location_id = $request->location_id;
+                $query = $query->whereHas('branches', function($q) use ($location_id) {
+                    $q->where('branch_id', $location_id);
+                });
+            }
+
+            $data = $query->get();
+
+            // Process each product to calculate accurate stock based on purchase and sale dates
+            if ($asOfDate) {
+                foreach ($data as $product) {
+                    // First, check if the product existed before the as_of_date
+                    $productCreationDate = Carbon::parse($product->created_at);
+                    if ($productCreationDate->gt(Carbon::parse($asOfDate))) {
+                        // Product was created after the as_of_date, set quantity to 0
+                        $product->product_quantity = 0;
+                        continue;
+                    }
+
+                    // Get all purchase details for this product up to the as_of_date
+                    $purchaseQuantity = DB::table('purchase_details')
+                        ->join('purchases', 'purchases.id', '=', 'purchase_details.purchase_id')
+                        ->where('purchase_details.product_id', $product->id)
+                        ->where('purchases.status', 'Completed')
+                        ->whereDate('purchases.date', '<=', $asOfDate)
+                        ->sum('purchase_details.quantity');
+
+                    // Get all sale details for this product up to the as_of_date
+                    $saleQuantity = DB::table('sale_details')
+                        ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
+                        ->where('sale_details.product_id', $product->id)
+                        ->whereDate('sales.date', '<=', $asOfDate)
+                        ->sum('sale_details.quantity');
+
+                    // Calculate the product quantity as of the specified date
+                    $product->product_quantity = $purchaseQuantity - $saleQuantity;
+
+                    // If quantity is negative, set to 0 (might happen due to data inconsistencies)
+                    if ($product->product_quantity < 0) {
+                        $product->product_quantity = 0;
+                    }
+                }
+            }
 
             $total = 0;
             foreach ($data as $key => $value) {
@@ -188,15 +289,114 @@ class StocksheetController extends Controller
                 break; // No more data, exit the loop
             }
 
-            $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock-levels', ['data' => $data, 'company' => $company, 'total' => $total]);
-            $pdfPath = $directory . '/' . 'stocklevel_page_' . $page . '_' . $timestamp . '.pdf'; // Filename with timestamp
-            // $pdfPath = $directory . '/' . 'St' . 'stocklevel_page_' . $page . '.pdf';
+            $dateInfo = $asOfDate ? '_asof_' . Carbon::parse($asOfDate)->format('Ymd') : '';
+            $reportTitle = $asOfDate ? "Stock Level as of " . Carbon::parse($asOfDate)->format('d M Y') : date('D d M Y') . ' Stock Level';
+
+            $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock-levels', [
+                'data' => $data,
+                'company' => $company,
+                'total' => $total,
+                'report_title' => $reportTitle
+            ]);
+
+            $pdfPath = $directory . '/' . 'stocklevel' . $dateInfo . '_page_' . $page . '_' . $timestamp . '.pdf'; // Filename with timestamp
             $pdf->save($pdfPath); // Save the PDF in the stockreports directory
 
             $page++;
         } while (true);
 
         toast('Stock Level PDF Generated! Please check on `Latest Generated Stock Level` below', 'success');
+
+        return redirect()->back();
+    }
+
+    public function closingStock(Request $request)
+    {
+        $perPage = 500;
+        $page = 1;
+        $company = Setting::first();
+        $directory = public_path('closingstock');
+        $timestamp = date('Ymd_His');
+        $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
+        $reportTitle = "Closing Stock as of " . Carbon::parse($asOfDate)->format('d M Y');
+
+        if (!File::exists($directory)) {
+            File::makeDirectory($directory, 0755, true);
+        }
+
+        do {
+            $query = Product::setEagerLoads([])
+                ->with(['branches', 'supplier'])
+                ->skip(($page - 1) * $perPage)
+                ->take($perPage);
+
+            // Apply location filter if provided
+            if ($request->location_id) {
+                $location_id = $request->location_id;
+                $query = $query->whereHas('branches', function($q) use ($location_id) {
+                    $q->where('branch_id', $location_id);
+                });
+            }
+
+            $data = $query->get();
+
+            // Process each product to calculate accurate stock based on purchase and sale dates
+            foreach ($data as $product) {
+                // First, check if the product existed before the as_of_date
+                $productCreationDate = Carbon::parse($product->created_at);
+                if ($productCreationDate->gt(Carbon::parse($asOfDate))) {
+                    // Product was created after the as_of_date, set quantity to 0
+                    $product->product_quantity = 0;
+                    continue;
+                }
+
+                // Get all purchase details for this product up to the as_of_date
+                $purchaseQuantity = DB::table('purchase_details')
+                    ->join('purchases', 'purchases.id', '=', 'purchase_details.purchase_id')
+                    ->where('purchase_details.product_id', $product->id)
+                    ->where('purchases.status', 'Completed')
+                    ->whereDate('purchases.date', '<=', $asOfDate)
+                    ->sum('purchase_details.quantity');
+
+                // Get all sale details for this product up to the as_of_date
+                $saleQuantity = DB::table('sale_details')
+                    ->join('sales', 'sales.id', '=', 'sale_details.sale_id')
+                    ->where('sale_details.product_id', $product->id)
+                    ->whereDate('sales.date', '<=', $asOfDate)
+                    ->sum('sale_details.quantity');
+
+                // Calculate the product quantity as of the specified date
+                $product->product_quantity = $purchaseQuantity - $saleQuantity;
+
+                // If quantity is negative, set to 0 (might happen due to data inconsistencies)
+                if ($product->product_quantity < 0) {
+                    $product->product_quantity = 0;
+                }
+            }
+
+            $total = 0;
+            foreach ($data as $key => $value) {
+                $total += $value->product_quantity * $value->product_cost;
+            }
+
+            if ($data->isEmpty()) {
+                break; // No more data, exit the loop
+            }
+
+            $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock-levels', [
+                'data' => $data,
+                'company' => $company,
+                'total' => $total,
+                'report_title' => $reportTitle
+            ]);
+
+            $pdfPath = $directory . '/' . 'closing_stock_' . Carbon::parse($asOfDate)->format('Ymd') . '_page_' . $page . '_' . $timestamp . '.pdf';
+            $pdf->save($pdfPath);
+
+            $page++;
+        } while (true);
+
+        toast('Closing Stock PDF Generated for ' . Carbon::parse($asOfDate)->format('d M Y') . '! Please check below', 'success');
 
         return redirect()->back();
     }

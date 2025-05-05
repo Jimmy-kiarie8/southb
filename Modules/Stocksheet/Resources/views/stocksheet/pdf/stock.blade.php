@@ -121,10 +121,10 @@
             <table width="100%">
                 <tr>
                     <td align="left">
-                        <img src="{{ public_path('images/logo/logo.png') }}" alt="{{ $company->company_name }}" style="width:200px;">
+                        <img src="{{ public_path(env('LOGO')) }}" alt="{{ $company->company_name }}" style="width:200px;">
                     </td>
                     <td align="right" style="width: 40%;">
-                        <h3>{{ date('D d M Y') }} Stock Sheet</h3> <br>
+                        <h3>{{ isset($report_title) ? $report_title : date('D d M Y') . ' Stock Sheet' }}</h3> <br>
                         <small>{{ $company->company_name }}</small> <br>
                         <small>{{ $company->company_phone }}</small> <br>
                         <address>{{ $company->company_email }}</address> <br>

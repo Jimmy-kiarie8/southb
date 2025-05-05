@@ -18,7 +18,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('stocksheet')->group(function () {
         Route::get('/', 'StocksheetController@index')->name('stocksheet.index');
         Route::post('/getStocksheet', 'StocksheetController@getStocksheet')->name('stocksheet.sheet');
-        Route::post('/stocklevel', 'StocksheetController@stocklevel')->name('stocksheet.level');;
+        Route::post('/stocklevel', 'StocksheetController@stocklevel')->name('stocksheet.level');
+        Route::post('/closingstock', 'StocksheetController@closingStock')->name('stocksheet.closing');
         Route::get('/filter', 'StocksheetController@filter')->name('stocksheet.filter');
 
     });

@@ -26,6 +26,16 @@
         $latestFileL = array_slice(array_reverse($fileL), 0, 8);
     @endphp
 
+    @php
+        $directory = public_path('closingstock');
+        if (File::exists($directory)) {
+            $fileC = File::glob($directory . '/*.pdf');
+            $latestFileC = array_slice(array_reverse($fileC), 0, 8);
+        } else {
+            $latestFileC = [];
+        }
+    @endphp
+
 
     <div class="container-fluid">
 
@@ -101,6 +111,40 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-4">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    style="border: 1px solid #dedede;border-radius: 10px;padding: 10px;background: #fff;"
+                                    data-bs-target="#flush-collapseThree" aria-expanded="false"
+                                    aria-controls="flush-collapseThree">
+                                    Latest Generated Closing Stock
+                                </button>
+                            </h2>
+                            <div id="flush-collapseThree" class="accordion-collapse collapse"
+                                data-bs-parent="#accordionFlushExample"
+                                style="border: 1px solid #dedede;border-radius: 10px;padding: 10px;background: #fff;">
+                                <div class="accordion-body">
+                                    <div class="list-group">
+                                        @if(count($latestFileC) > 0)
+                                            @foreach ($latestFileC as $file)
+                                                @php
+                                                    $filename = basename($file);
+                                                    $fileUrl = asset("closingstock/{$filename}");
+                                                @endphp
+                                                <a href="{{ $fileUrl }}" class="list-group-item list-group-item-action"
+                                                    target="_blank">
+                                                    {{ $filename }}
+                                                </a>
+                                            @endforeach
+                                        @else
+                                            <div class="text-center">No closing stock reports generated yet.</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -125,6 +169,11 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-3">
+                                <input type="date" class="form-control" name="as_of_date" id="as_of_date"
+                                    value="{{ request('as_of_date', '') }}" placeholder="Stock as of date">
+                                <small class="form-text text-muted">Stock as of date (e.g., 2024-12-31)</small>
+                            </div>
                             <button class="btn btn-primary" type="submit">Filter <i class="bi bi-search"></i></button>
                         </form>
                         <br>
@@ -140,6 +189,7 @@
                                     <form action="{{ route('stocksheet.sheet') }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="location_id" value="{{ request('location_id') }}">
+                                        <input type="hidden" name="as_of_date" value="{{ request('as_of_date') }}">
                                         <button class="btn btn-primary" type="submit">
                                             <i class="bi bi-file-earmark-pdf"></i> Stock sheet
                                         </button>
@@ -147,12 +197,22 @@
                                 </div>
                                 <div class="col-2">
 
-
                                     <form action="{{ route('stocksheet.level') }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="location_id" value="{{ request('location_id') }}">
+                                        <input type="hidden" name="as_of_date" value="{{ request('as_of_date') }}">
                                         <button class="btn btn-primary" type="submit">
                                             <i class="bi bi-file-earmark-pdf"></i> Stock Level
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-2">
+                                    <form action="{{ route('stocksheet.closing') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="location_id" value="{{ request('location_id') }}">
+                                        <input type="hidden" name="as_of_date" value="{{ request('as_of_date') }}">
+                                        <button class="btn btn-success" type="submit">
+                                            <i class="bi bi-file-earmark-pdf"></i> Closing Stock
                                         </button>
                                     </form>
                                 </div>
