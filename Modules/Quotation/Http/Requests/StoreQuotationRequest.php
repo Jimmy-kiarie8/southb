@@ -20,6 +20,7 @@ class StoreQuotationRequest extends FormRequest
             'tax_percentage' => 'nullable|integer|min:0|max:100',
             'discount_percentage' => 'required|integer|min:0|max:100',
             'shipping_amount' => 'required|numeric',
+            'is_tax_inclusive' => 'boolean',
             'total_amount' => 'required|numeric',
             'status' => 'required|string|max:255',
             'note' => 'nullable|string|max:1000'

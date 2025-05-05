@@ -67,6 +67,15 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <label for="is_tax_inclusive">VAT Type <span class="text-danger">*</span></label>
+                                        <select class="form-control" name="is_tax_inclusive" id="is_tax_inclusive" required>
+                                            <option {{ $quotation->is_tax_inclusive == '0' ? 'selected' : '' }} value="0">VAT Exclusive</option>
+                                            <option {{ $quotation->is_tax_inclusive == '1' ? 'selected' : '' }} value="1">VAT Inclusive</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group">

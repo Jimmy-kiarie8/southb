@@ -24,6 +24,7 @@ class CreateQuotationsTable extends Migration
             $table->integer('discount_percentage')->default(0);
             $table->integer('discount_amount')->default(0);
             $table->integer('shipping_amount')->default(0);
+            $table->boolean('is_tax_inclusive')->default(false);
             $table->integer('total_amount');
             $table->string('status');
             $table->text('note')->nullable();

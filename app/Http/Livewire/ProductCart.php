@@ -352,14 +352,26 @@ class ProductCart extends Component
 
     public function calculateTotals()
     {
-        // Get total including tax
-        $total_with_shipping = Cart::instance($this->cart_instance)->total() + (float)$this->shipping;
+        // Check if tax is inclusive from the request
+        $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
 
-        // Extract tax amount from total (16% VAT)
-        $tax = $total_with_shipping - ($total_with_shipping / 1.16);
+        if ($is_tax_inclusive) {
+            // If tax inclusive, the price already includes VAT
+            // Get total including tax
+            $total_with_shipping = Cart::instance($this->cart_instance)->total() + (float)$this->shipping;
 
-        // Calculate net total (total minus tax)
-        $netTotal = $total_with_shipping - $tax;
+            // Extract tax from total based on tax rate
+            $tax_rate = 1 + ($this->global_tax / 100);
+            $tax = $total_with_shipping - ($total_with_shipping / $tax_rate);
+
+            // Net total is total minus tax
+            $netTotal = $total_with_shipping - $tax;
+        } else {
+            // If tax exclusive, calculate VAT on top of total
+            $netTotal = Cart::instance($this->cart_instance)->total();
+            $tax = $netTotal * ($this->global_tax / 100);
+            $total_with_shipping = $netTotal + $tax + (float)$this->shipping;
+        }
 
         return [
             'netTotal' => $netTotal,

@@ -54,6 +54,9 @@
                                 <div>
                                     Payment Status: <strong>{{ $quotation->payment_status }}</strong>
                                 </div>
+                                <div>
+                                    VAT Type: <strong>{{ $quotation->is_tax_inclusive ? 'Inclusive' : 'Exclusive' }}</strong>
+                                </div>
                             </div>
 
                         </div>

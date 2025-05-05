@@ -59,6 +59,7 @@
                                     <div>Quote No: <strong>{{ $quotation->reference }}</strong></div>
                                     <div>Date: {{ \Carbon\Carbon::parse($quotation->date)->format('d M, Y') }}</div>
                                     <div>Status: <strong>{{ $quotation->status }}</strong></div>
+                                    <div>VAT Type: <strong>{{ $quotation->is_tax_inclusive ? 'Inclusive' : 'Exclusive' }}</strong></div>
                                 </td>
                             </tr>
                         </table>

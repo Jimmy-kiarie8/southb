@@ -139,11 +139,21 @@
                         <tr id="total_amount">
                             <th>Net Total</th>
                             @php
+                                $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
                                 $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
-                                $tax =
-                                    Cart::instance($cart_instance)->total() -
-                                    Cart::instance($cart_instance)->total() / 1.16;
-                                $total = $total_with_shipping - $tax;
+
+                                if ($is_tax_inclusive) {
+                                    // If tax inclusive, the price already includes VAT
+                                    // Extract tax from total
+                                    $tax_rate = 1 + ($global_tax / 100);
+                                    $tax = $total_with_shipping - ($total_with_shipping / $tax_rate);
+                                    $total = $total_with_shipping - $tax;
+                                } else {
+                                    // If tax exclusive, calculate VAT on top of total
+                                    $tax = Cart::instance($cart_instance)->total() * ($global_tax / 100);
+                                    $total = Cart::instance($cart_instance)->total();
+                                    $total_with_shipping = $total + $tax + (float) $shipping;
+                                }
                             @endphp
                             <th>
                                 (=) {{ format_currency($total) }}
@@ -153,11 +163,21 @@
                         <tr id="total_amount">
                             <th>Net Total</th>
                             @php
+                                $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
                                 $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
-                                $tax =
-                                    Cart::instance($cart_instance)->total() -
-                                    Cart::instance($cart_instance)->total() / 1.16;
-                                $total = $total_with_shipping - $tax;
+
+                                if ($is_tax_inclusive) {
+                                    // If tax inclusive, the price already includes VAT
+                                    // Extract tax from total
+                                    $tax_rate = 1 + ($global_tax / 100);
+                                    $tax = $total_with_shipping - ($total_with_shipping / $tax_rate);
+                                    $total = $total_with_shipping - $tax;
+                                } else {
+                                    // If tax exclusive, calculate VAT on top of total
+                                    $tax = Cart::instance($cart_instance)->total() * ($global_tax / 100);
+                                    $total = Cart::instance($cart_instance)->total();
+                                    $total_with_shipping = $total + $tax + (float) $shipping;
+                                }
                             @endphp
                             <th>
                                 (=) {{ format_currency($total) }}
@@ -168,9 +188,7 @@
 
                     <tr>
                         <th>VAT ({{ $global_tax }}%)</th>
-                        <td>(+)
-                            {{ format_currency(Cart::instance($cart_instance)->total() - Cart::instance($cart_instance)->total() / 1.16) }}
-                        </td>
+                        <td>(+) {{ format_currency($tax) }}</td>
                         {{-- <td>(+) {{ format_currency(Cart::instance($cart_instance)->tax()) }}</td> --}}
                     </tr>
                     {{-- <tr>
@@ -186,9 +204,6 @@
                     @if ($cart_instance != 'purchase')
                         <tr id="total_amount">
                             <th>Grand Total</th>
-                            @php
-                                $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
-                            @endphp
                             <th>
                                 (=) {{ format_currency($total_with_shipping) }}
                             </th>
@@ -197,9 +212,6 @@
                         <tr id="total_amount">
                             <th>Grand Total</th>
 
-                            @php
-                                $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
-                            @endphp
                             <th>
                                 (=) {{ format_currency($total_with_shipping) }}
                                 {{-- (=) {{ format_currency($total_with_shipping) }} --}}
@@ -215,6 +227,7 @@
     </div>
     {{-- @if ($cart_instance != 'purchase') --}}
     <input type="hidden" name="total_amount" value="{{ $total_with_shipping }}">
+    <input type="hidden" name="tax_percentage" value="{{ $global_tax }}">
     {{-- @endif --}}
 
     <div class="form-row">
