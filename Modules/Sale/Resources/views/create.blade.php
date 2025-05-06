@@ -85,6 +85,12 @@
                                         </select>
                                     </div>
                                 </div>
+{{--
+                                <div class="col-lg-4">
+                                    <label for="is_tax_inclusive">Tax Inclusive</label>
+                                    <input type="checkbox" name="is_tax_inclusive" id="is_tax_inclusive"
+                                        class="form-control">
+                                </div> --}}
 
                                 <div class="col-lg-4">
                                     <label for="payment_method">Payment Method</label>

@@ -139,8 +139,10 @@
                         <tr id="total_amount">
                             <th>Net Total</th>
                             @php
-                                $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
+                                // $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
                                 $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
+
+                                $is_tax_inclusive = true;
 
                                 if ($is_tax_inclusive) {
                                     // If tax inclusive, the price already includes VAT
@@ -163,7 +165,8 @@
                         <tr id="total_amount">
                             <th>Net Total</th>
                             @php
-                                $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
+                                $is_tax_inclusive = true;
+                                // $is_tax_inclusive = request()->has('is_tax_inclusive') ? request()->is_tax_inclusive == '1' : false;
                                 $total_with_shipping = Cart::instance($cart_instance)->total() + (float) $shipping;
 
                                 if ($is_tax_inclusive) {
