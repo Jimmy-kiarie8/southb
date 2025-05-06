@@ -190,9 +190,14 @@
                                         @csrf
                                         <input type="hidden" name="location_id" value="{{ request('location_id') }}">
                                         <input type="hidden" name="as_of_date" value="{{ request('as_of_date') }}">
-                                        <button class="btn btn-primary" type="submit">
-                                            <i class="bi bi-file-earmark-pdf"></i> Stock sheet
-                                        </button>
+                                        <div class="btn-group">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="bi bi-file-earmark-pdf"></i> Stock sheet
+                                            </button>
+                                            <button class="btn btn-success" type="submit" name="format" value="excel">
+                                                <i class="bi bi-file-earmark-excel"></i> Excel
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                                 <div class="col-2">
@@ -201,9 +206,14 @@
                                         @csrf
                                         <input type="hidden" name="location_id" value="{{ request('location_id') }}">
                                         <input type="hidden" name="as_of_date" value="{{ request('as_of_date') }}">
-                                        <button class="btn btn-primary" type="submit">
-                                            <i class="bi bi-file-earmark-pdf"></i> Stock Level
-                                        </button>
+                                        <div class="btn-group">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="bi bi-file-earmark-pdf"></i> Stock Level
+                                            </button>
+                                            <button class="btn btn-success" type="submit" name="format" value="excel">
+                                                <i class="bi bi-file-earmark-excel"></i> Excel
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                                 <div class="col-2">
@@ -211,9 +221,14 @@
                                         @csrf
                                         <input type="hidden" name="location_id" value="{{ request('location_id') }}">
                                         <input type="hidden" name="as_of_date" value="{{ request('as_of_date') }}">
-                                        <button class="btn btn-success" type="submit">
-                                            <i class="bi bi-file-earmark-pdf"></i> Closing Stock
-                                        </button>
+                                        <div class="btn-group">
+                                            <button class="btn btn-success" type="submit">
+                                                <i class="bi bi-file-earmark-pdf"></i> Closing Stock
+                                            </button>
+                                            <button class="btn btn-info" type="submit" name="format" value="excel">
+                                                <i class="bi bi-file-earmark-excel"></i> Excel
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>

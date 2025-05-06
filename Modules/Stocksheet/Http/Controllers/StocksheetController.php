@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Modules\Stocksheet\Exports\StocksheetExport;
+use Modules\Stocksheet\Exports\StockLevelExport;
+use Modules\Stocksheet\Exports\ClosingStockExport;
 
 class StocksheetController extends Controller
 {
@@ -130,10 +134,14 @@ class StocksheetController extends Controller
         $page = 1;
         $company = Setting::first();
         $directory = public_path('stockreports');
+        $format = $request->format ?? 'pdf'; // Default to PDF if no format is specified
 
         // Log::info('StockSheet request data:', $request->all());
         $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
         // Log::info('StockSheet using as_of_date: ' . $asOfDate);
+
+        // For Excel export, we'll collect all data across pages
+        $allData = collect();
 
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -245,9 +253,18 @@ class StocksheetController extends Controller
                 $data = $originalData;
             }
 
+            // Add to all data collection for Excel
+            $allData = $allData->merge($data);
+
             if ($data->isEmpty()) {
                 // Log::info('No more data for stocksheet, breaking the loop');
                 break; // No more data, exit the loop
+            }
+
+            // If generating Excel, skip PDF generation
+            if ($format === 'excel') {
+                $page++;
+                continue;
             }
 
             $dateInfo = $asOfDate ? '_asof_' . Carbon::parse($asOfDate)->format('Ymd') : '';
@@ -268,6 +285,18 @@ class StocksheetController extends Controller
             // Log::info('Moving to stocksheet page: ' . $page);
         } while (true);
 
+        // If Excel format is requested, export the data
+        if ($format === 'excel') {
+            $reportTitle = $asOfDate ? "Stock Sheet as of " . Carbon::parse($asOfDate)->format('d M Y') : date('D d M Y') . ' Stock Sheet';
+            $locationInfo = $request->location_id ? '_loc' . $request->location_id : '';
+            $filename = 'stocksheet' . $locationInfo . '_' . Carbon::parse($asOfDate)->format('Ymd') . '.xlsx';
+
+            return Excel::download(
+                new StocksheetExport($allData, $reportTitle),
+                $filename
+            );
+        }
+
         // Log::info('Stocksheet generation completed successfully');
         toast('Stock Sheet PDF Generated! Please check on `Latest Generated Stock Level` below', 'success');
 
@@ -282,11 +311,16 @@ class StocksheetController extends Controller
         $company = Setting::first();
         $directory = public_path('stocklevels');
         $timestamp = date('Ymd_His'); // Get the current date in 'YYYYMMDD_HHMMSS' format
+        $format = $request->format ?? 'pdf'; // Default to PDF if no format is specified
 
         // Log::info($request->as_of_date);
         // Log::info('Request data for stocklevel:', $request->all());
         $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
         // Log::info('Processed as_of_date: ' . $asOfDate);
+
+        // For Excel export, we'll collect all data across pages
+        $allData = collect();
+        $totalValue = 0;
 
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -390,15 +424,25 @@ class StocksheetController extends Controller
                 $data = $originalData;
             }
 
-            $total = 0;
+            // Add to all data collection for Excel
+            $allData = $allData->merge($data);
+
+            $pageTotal = 0;
             foreach ($data as $value) {
-                $total += $value->product_quantity * $value->product_cost;
+                $pageTotal += $value->product_quantity * $value->product_cost;
             }
-            // Log::info('Stocklevel page ' . $page . ' total value: ' . $total);
+            $totalValue += $pageTotal;
+            // Log::info('Stocklevel page ' . $page . ' total value: ' . $pageTotal);
 
             if ($data->isEmpty()) {
                 // Log::info('No more data for stocklevel, breaking the loop');
                 break; // No more data, exit the loop
+            }
+
+            // If generating Excel, skip PDF generation
+            if ($format === 'excel') {
+                $page++;
+                continue;
             }
 
             $dateInfo = $asOfDate ? '_asof_' . Carbon::parse($asOfDate)->format('Ymd') : '';
@@ -408,7 +452,7 @@ class StocksheetController extends Controller
             $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock-levels', [
                 'data' => $data,
                 'company' => $company,
-                'total' => $total,
+                'total' => $pageTotal,
                 'report_title' => $reportTitle
             ]);
 
@@ -419,6 +463,18 @@ class StocksheetController extends Controller
             $page++;
             // Log::info('Moving to stocklevel page: ' . $page);
         } while (true);
+
+        // If Excel format is requested, export the data
+        if ($format === 'excel') {
+            $reportTitle = $asOfDate ? "Stock Level as of " . Carbon::parse($asOfDate)->format('d M Y') : date('D d M Y') . ' Stock Level';
+            $locationInfo = $request->location_id ? '_loc' . $request->location_id : '';
+            $filename = 'stocklevel' . $locationInfo . '_' . Carbon::parse($asOfDate)->format('Ymd') . '.xlsx';
+
+            return Excel::download(
+                new StockLevelExport($allData, $totalValue, $reportTitle),
+                $filename
+            );
+        }
 
         // Log::info('Stocklevel generation completed');
         toast('Stock Level PDF Generated! Please check on `Latest Generated Stock Level` below', 'success');
@@ -433,11 +489,16 @@ class StocksheetController extends Controller
         $company = Setting::first();
         $directory = public_path('closingstock');
         $timestamp = date('Ymd_His');
+        $format = $request->format ?? 'pdf'; // Default to PDF if no format is specified
         $asOfDate = $request->as_of_date ? Carbon::parse($request->as_of_date)->format('Y-m-d') : Carbon::now()->format('Y-m-d');
         $reportTitle = "Closing Stock as of " . Carbon::parse($asOfDate)->format('d M Y');
 
         // Log::alert($request->all());
         // Log::info('Using as_of_date: ' . $asOfDate);
+
+        // For Excel export, we'll collect all data across pages
+        $allData = collect();
+        $totalValue = 0;
 
         if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -529,7 +590,7 @@ class StocksheetController extends Controller
                 }
 
                 // IMPORTANT: Actually replace the product quantity with calculated value
-                $product->qty = $calculatedQuantity ?? 0;
+                $product->qty = $calculatedQuantity;
 
                 // Add this modified product to our new collection
                 $data->push($product);
@@ -537,21 +598,31 @@ class StocksheetController extends Controller
                 // Log::info('Final quantity set: ' . $product->product_quantity . ' calculatedQuantity: ' . $calculatedQuantity);
             }
 
-            $total = 0;
+            // Add to all data collection for Excel
+            $allData = $allData->merge($data);
+
+            $pageTotal = 0;
             foreach ($data as $value) {
-                $total += $value->product_quantity * $value->product_cost;
+                $pageTotal += $value->product_quantity * $value->product_cost;
             }
-            // Log::info('Page ' . $page . ' total value: ' . $total);
+            $totalValue += $pageTotal;
+            // Log::info('Page ' . $page . ' total value: ' . $pageTotal);
 
             if ($data->isEmpty()) {
                 // Log::info('No more data, breaking the loop');
                 break; // No more data, exit the loop
             }
 
+            // If generating Excel, skip PDF generation
+            if ($format === 'excel') {
+                $page++;
+                continue;
+            }
+
             $pdf = PDF::loadView('stocksheet::stocksheet.pdf.stock-levels', [
                 'data' => $data,
                 'company' => $company,
-                'total' => $total,
+                'total' => $pageTotal,
                 'report_title' => $reportTitle
             ]);
 
@@ -562,6 +633,17 @@ class StocksheetController extends Controller
             $page++;
             // Log::info('Moving to page: ' . $page);
         } while (true);
+
+        // If Excel format is requested, export the data
+        if ($format === 'excel') {
+            $locationInfo = $request->location_id ? '_loc' . $request->location_id : '';
+            $filename = 'closing_stock' . $locationInfo . '_' . Carbon::parse($asOfDate)->format('Ymd') . '.xlsx';
+
+            return Excel::download(
+                new ClosingStockExport($allData, $totalValue, $company, Carbon::parse($asOfDate)->format('d M Y'), $reportTitle),
+                $filename
+            );
+        }
 
         // Log::info('Closing stock generation completed');
         toast('Closing Stock PDF Generated for ' . Carbon::parse($asOfDate)->format('d M Y') . '! Please check below', 'success');
