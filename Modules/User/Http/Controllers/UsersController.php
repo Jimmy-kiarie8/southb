@@ -81,6 +81,7 @@ class UsersController extends Controller
 
 
     public function update(Request $request, User $user) {
+        // return $request->all();
         abort_if(Gate::denies('access_user_management'), 403);
 
         $request->validate([
@@ -89,13 +90,16 @@ class UsersController extends Controller
             'branch_id'     => 'required'
         ]);
 
+
         $user->update([
             'name'     => $request->name,
             'email'    => $request->email,
             'is_active' => $request->is_active,
-            'branch_id' => 1
-            // 'branch_id' => $request->branch_id
+            // 'branch_id' => 1
+            'branch_id' => $request->branch_id
         ]);
+
+        // return $user;
 
         $user->syncRoles($request->role);
 

@@ -19,10 +19,9 @@ class ProductScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-
-        // $productIds = ProductBranch::where('branch_id', Auth::user()->branch_id)
-        //     ->pluck('product_id')
-        //     ->toArray();
-        // $builder->whereIn('id', $productIds)->with('category');
+        $productIds = ProductBranch::where('branch_id', Auth::user()->branch_id)
+            ->pluck('product_id')
+            ->toArray();
+        $builder->whereIn('id', $productIds)->with('category');
     }
 }

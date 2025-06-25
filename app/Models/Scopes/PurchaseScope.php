@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 
-class SalesScope implements Scope
+class PurchaseScope implements Scope
 {
     /**
      * Apply the scope to a given Eloquent query builder.
@@ -18,7 +18,7 @@ class SalesScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $builder->where('branch_id', Auth::user()->branch_id);
+        $builder->where('location_id', Auth::user()->branch_id);
         $builder->orderBy('id', 'DESC');
     }
 }

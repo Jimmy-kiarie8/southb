@@ -39,6 +39,7 @@
 
 
 
+                                @if (Auth::user()->roles->first()->name == 'Super Admin')
                                 <div class="col-lg-3">
                                     <div class="form-group">
                                         <label for="location_id">Location <span class="text-danger">*</span></label>
@@ -50,6 +51,7 @@
                                         </select>
                                     </div>
                                 </div>
+                                @endif
                                 <div class="col-lg-3">
                                     <div class="from-group">
                                         <div class="form-group">

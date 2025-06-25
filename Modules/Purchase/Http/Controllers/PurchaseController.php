@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Modules\Branch\Entities\ProductBranch;
 use Modules\People\Entities\Supplier;
 use Modules\Product\Entities\Product;
@@ -82,7 +83,13 @@ class PurchaseController extends Controller
                 }
             }
 
-            $location_id = $request->location_id ?? 1;
+            // Get user role
+            $user_role = Auth::user()->roles->first()->name;
+            if ($user_role == 'Super Admin') {
+                $location_id = ($request->location_id) ? $request->location_id : Auth::user()->branch_id;
+            } else {
+                $location_id = Auth::user()->branch_id;
+            }
 
             $cart_total = 0;
             $cart_items = Cart::instance($instance)->content();

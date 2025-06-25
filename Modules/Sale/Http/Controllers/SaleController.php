@@ -53,7 +53,16 @@ class SaleController extends Controller
         DB::transaction(function () use ($request) {
             // $paid_amount =  $cash_paid_amount + $bank_paid_amount + $mpesa_paid_amount + $cheque_paid_amount;
             // $due_amount = $request->total_amount - $paid_amount;
-            $location_id = ($request->location_id) ? $request->location_id : Auth::user()->branch_id;
+            // Get user role
+            $user_role = Auth::user()->roles->first()->name;
+
+            if ($user_role == 'Super Admin') {
+                $location_id = ($request->location_id) ? $request->location_id : Auth::user()->branch_id;
+            // $location_id = $request->location_id;
+            } else {
+                $location_id = Auth::user()->branch_id;
+            }
+
             $paid_amount = $request->total_amount;
 
             $total_amount = 0;

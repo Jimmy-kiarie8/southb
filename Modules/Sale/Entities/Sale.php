@@ -68,6 +68,7 @@ class Sale extends Model
                 $number = DB::table('sales')->lockForUpdate()->max('id') + 1;
                 $model->reference = make_reference_id('INVOICE', $number);
                 $model->user_id = Auth::id();
+                $model->branch_id = Auth::user()->branch_id;
             });
         });
 

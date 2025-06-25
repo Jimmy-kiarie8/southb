@@ -2,8 +2,12 @@
 
 namespace Modules\Purchase\Entities;
 
+use App\Models\Scopes\PurchaseScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
+use Modules\Branch\Entities\Branch;
 
 class Purchase extends Model
 {
@@ -25,14 +29,28 @@ class Purchase extends Model
     public static function boot() {
         parent::boot();
 
+        static::addGlobalScope(new PurchaseScope);
+
         static::creating(function ($model) {
             $number = Purchase::max('id') + 1;
             $model->reference = make_reference_id('PR', $number);
+            // $model->user_id = Auth::id();
+            $model->location_id = Auth::user()->branch_id;
         });
     }
 
     public function scopeCompleted($query) {
         return $query->where('status', 'Completed');
+    }
+
+    /**
+     * Get the branch that owns the Purchase
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
     // public function getShippingAmountAttribute($value) {
