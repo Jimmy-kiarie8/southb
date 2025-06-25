@@ -1,6 +1,6 @@
 <form wire:submit.prevent="updatePrice('{{ $cart_item->rowId }}', '{{ $cart_item->id }}')">
     <div class="input-group">
-        <input wire:model.defer="price.{{ $cart_item->id }}" style="min-width: 40px;max-width: 90px;" type="number"
+        <input wire:model.defer="price.{{ $cart_item->id }}" style="min-width: 90px;max-width: 120px;" type="number"
             class="form-control" value="{{ $cart_item->unit_price }}" wire:change="updatePrice('{{ $cart_item->rowId }}', '{{ $cart_item->id }}')" >
         <div class="input-group-append">
             <button type="submit" class="btn btn-primary">

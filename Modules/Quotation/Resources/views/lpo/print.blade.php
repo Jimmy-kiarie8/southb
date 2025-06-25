@@ -7,6 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>LPO Details</title>
     <link rel="stylesheet" href="{{ public_path('b3/bootstrap.min.css') }}">
+    <style>
+        @media print {
+            .row { display: flex; flex-wrap: wrap; }
+            .col-md-4 { width: 33.3333%; float: left; box-sizing: border-box; }
+            .clearfix { clear: both; }
+        }
+        .col-md-4 { width: 33.3333%; float: left; box-sizing: border-box; }
+        .clearfix { clear: both; }
+    </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -20,36 +29,32 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-xs-4 mb-3 mb-md-0">
-                            <h4 class="mb-2" style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Company Info:</h4>
-                            <div><strong>{{ settings()->company_name }}</strong></div>
-                            <div>{{ settings()->company_address }}</div>
-                            <div>Email: {{ settings()->company_email }}</div>
-                            <div>Phone: {{ settings()->company_phone }}</div>
-                        </div>
-
-                        <div class="col-xs-4 mb-3 mb-md-0">
-                            <h4 class="mb-2" style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Supplier Info:</h4>
-                            <div><strong>{{ $supplier->supplier_name }}</strong></div>
-                            <div>{{ $supplier->address }}</div>
-                            <div>Email: {{ $supplier->supplier_email }}</div>
-                            <div>Phone: {{ $supplier->supplier_phone }}</div>
-                        </div>
-
-                        <div class="col-xs-4 mb-3 mb-md-0">
-                            <h4 class="mb-2" style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Invoice Info:</h4>
-                            <div>Invoice: <strong>INV/{{ $lpo->reference }}</strong></div>
-                            <div>Date: {{ \Carbon\Carbon::parse($lpo->date)->format('d M, Y') }}</div>
-                            <div>
-                                Status: <strong>{{ $lpo->status }}</strong>
-                            </div>
-                            <div>
-                                Payment Status: <strong>{{ $lpo->payment_status }}</strong>
-                            </div>
-                        </div>
-
-                    </div>
+                    <table width="100%" border="1" cellspacing="0" cellpadding="8" style="margin-bottom: 30px; border-collapse: collapse;">
+                        <tr>
+                            <td width="33%" valign="top">
+                                <h4 style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Company Info:</h4>
+                                <div><strong>{{ settings()->company_name }}</strong></div>
+                                <div>{{ settings()->company_address }}</div>
+                                <div>Email: {{ settings()->company_email }}</div>
+                                <div>Phone: {{ settings()->company_phone }}</div>
+                            </td>
+                            <td width="33%" valign="top">
+                                <h4 style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Supplier Info:</h4>
+                                <div><strong>{{ $supplier->supplier_name }}</strong></div>
+                                <div>{{ $supplier->address }}</div>
+                                <div>Email: {{ $supplier->supplier_email }}</div>
+                                <div>Phone: {{ $supplier->supplier_phone }}</div>
+                            </td>
+                            <td width="34%" valign="top">
+                                <h4 style="border-bottom: 1px solid #dddddd;padding-bottom: 10px;">Invoice Info:</h4>
+                                <div>Invoice: <strong>INV/{{ $lpo->reference }}</strong></div>
+                                <div>Date: {{ \Carbon\Carbon::parse($lpo->date)->format('d M, Y') }}</div>
+                                <div>Status: <strong>{{ $lpo->status }}</strong></div>
+                                <div>Payment Status: <strong>{{ $lpo->payment_status }}</strong></div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="clearfix"></div>
 
                     <div class="table-responsive-sm" style="margin-top: 30px;">
                         <table class="table table-striped">
@@ -88,7 +93,7 @@
                                     </td>
 
                                     <td class="align-middle">
-                                        {{ format_currency($item->sub_total) }}
+                                        {{ format_currency($item->unit_price * $item->quantity) }}
                                     </td>
                                 </tr>
                             @endforeach

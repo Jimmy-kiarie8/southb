@@ -3,12 +3,14 @@
 namespace App\Http\Livewire\Reports;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Product\Entities\Product;
 use Modules\Sale\Entities\Sale;
 use Modules\Sale\Entities\SaleDetails;
 use Modules\Setting\Entities\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProductReport extends Component
 {
@@ -21,6 +23,40 @@ class ProductReport extends Component
     public $start_date;
     public $end_date;
     public $product_id;
+
+    public $productSearch = '';
+    public $showProductDropdown = false;
+    public $selectedProductName = 'All';
+
+
+
+    public function getFilteredProductsProperty()
+    {
+        $products = Product::where('product_code', 'like', '%' . $this->productSearch . '%')
+            ->orderBy('product_code', 'asc')
+            ->limit(50)
+            ->get();
+
+        Log::info($this->productSearch);
+
+        Log::info($products);
+
+        return $products;
+    }
+
+    public function toggleProductDropdown()
+    {
+        $this->showProductDropdown = !$this->showProductDropdown;
+    }
+
+    public function selectProduct($id, $name)
+    {
+        $this->product_id = $id;
+        $this->selectedProductName = $name;
+        $this->productSearch = $name;
+        $this->showProductDropdown = false;
+    }
+
 
     protected $rules = [
         'start_date' => 'required|date',
@@ -67,8 +103,11 @@ class ProductReport extends Component
         $data = $this->query()->get();
 
         $company = Setting::first();
-        $pdf = \PDF::loadView('reports::pdf.products', ['count' => $this->query()->sum('quantity'), 'data' => $data, 'company' =>  $company]);
-        return $pdf->stream(Carbon::now() . '-product-sale.pdf');
+        $pdf = Pdf::loadView('reports::pdf.products', ['count' => $this->query()->sum('quantity'), 'data' => $data, 'company' =>  $company]);
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            Carbon::now()->format('Y-m-d') . '-product-sale.pdf'
+        );
     }
 
     public function query()
@@ -78,8 +117,8 @@ class ProductReport extends Component
         $end_date = Carbon::parse($this->end_date)->endOfDay();
         $same_day = ($start_date == $end_date) ? true : false;
         $sales = Sale::when($this->user_id, function ($query) {
-                        return $query->where('user_id', $this->user_id);
-                    })->orderBy('date', 'desc');
+            return $query->where('user_id', $this->user_id);
+        })->orderBy('date', 'desc');
 
         if ($same_day) {
             $sales = $sales->whereDate('date', $this->start_date);

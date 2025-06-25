@@ -35,7 +35,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+                            {{-- <div class="col-lg-4">
                                 <div class="form-group">
                                     <label>Items</label>
                                     <select wire:model.defer="product_id" class="form-control" name="product_id">
@@ -44,6 +44,44 @@
                                             <option value="{{ $product->id }}">{{ $product->product_name }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                            </div> --}}
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Items</label>
+                                    <div class="position-relative">
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Search products..."
+                                            wire:model.debounce.300ms="productSearch"
+                                            wire:click="toggleProductDropdown"
+                                            autocomplete="off"
+                                            value="{{ $selectedProductName }}"
+                                        >
+
+                                        @if($showProductDropdown)
+                                            <div class="dropdown-menu show w-100 position-absolute" style="max-height: 200px; overflow-y: auto; z-index: 1000;">
+                                                <a class="dropdown-item {{ $product_id === '' ? 'active' : '' }}"
+                                                   wire:click="selectProduct('', 'All')"
+                                                   href="javascript:void(0)">
+                                                    All
+                                                </a>
+                                                @forelse($this->filteredProducts as $product)
+                                                    <a class="dropdown-item {{ $product_id == $product->id ? 'active' : '' }}"
+                                                       wire:click="selectProduct({{ $product->id }}, '{{ $product->product_code }}')"
+                                                       href="javascript:void(0)">
+                                                        {{ $product->product_code }}
+                                                    </a>
+                                                @empty
+                                                    <span class="dropdown-item-text text-muted">No products found</span>
+                                                @endforelse
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Hidden input to maintain the form structure -->
+                                    <input type="hidden" wire:model="product_id" name="product_id">
                                 </div>
                             </div>
                         </div>

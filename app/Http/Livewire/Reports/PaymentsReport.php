@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Reports;
 
 use App\Exports\PaymentExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -149,8 +150,11 @@ class PaymentsReport extends Component
 
         $company = Setting::first();
 
-        $pdf = \PDF::loadView('reports::pdf.payment', ['data' => $data, 'company' =>  $company, 'sale_made' => $this->sale_made, 'payments_made' => $this->payments_made, 'payments' => $this->payments]);
-        return $pdf->stream(Carbon::now() . '-sales.pdf');
+        $pdfContent = Pdf::loadView('reports::pdf.payment', ['data' => $data, 'company' =>  $company, 'sale_made' => $this->sale_made, 'payments_made' => $this->payments_made, 'payments' => $this->payments])->output();
+        return response()->streamDownload(
+            fn () => print($pdfContent),
+            Carbon::now() . '-sales.pdf'
+        );
     }
 
     public function queryFilter()

@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Modules\Purchase\Entities\Purchase;
 use Modules\Setting\Entities\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Modules\People\Entities\Supplier;
 
 class PurchasesReport extends Component
 {
@@ -91,6 +92,46 @@ class PurchasesReport extends Component
 
         $pdf = Pdf::loadView('reports::pdf.purchase', ['data' => $data, 'company' =>  $company, 'total' => $total]);
         // return $pdf->download(Carbon::now() . '-purchase.pdf');
+
+        // Return the PDF as a response that can be downloaded
+        return response()->streamDownload(function() use ($pdf) {
+            echo $pdf->output();
+        }, Carbon::now() . '-purchase.pdf', [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . Carbon::now() . '-purchase.pdf"',
+        ]);
+    }
+
+
+    public function pdf2()
+    {
+        $this->validate();
+        $purchases = $this->query2();
+
+        // Log::debug($data);
+        // $data = $this->mapItem($data);
+
+        $allRows = [];
+        $total = 0;
+
+        foreach ($purchases as $purchase) {
+            $total += $purchase->purchase_details_sum_sub_total;
+            // dd($purchase);
+            $rows = $this->mapItem($purchase->toArray());  // Assuming mapItem handles individual purchases
+            $allRows = array_merge($allRows, $rows);  // Merge rows into the main collection
+        }
+
+
+        $company = Setting::first();
+
+        if ($this->supplier_id) {
+            $supplier = Supplier::select('supplier_name')->find($this->supplier_id)->supplier_name;
+        } else {
+            $supplier = null;
+        }
+
+        $pdf = Pdf::loadView('reports::pdf.purchase-detail', ['data' => $allRows, 'company' =>  $company, 'supplier' => $supplier, 'total' => $total]);
+        // return $pdf->stream(Carbon::now() . '-purchase.pdf');
 
         // Return the PDF as a response that can be downloaded
         return response()->streamDownload(function() use ($pdf) {

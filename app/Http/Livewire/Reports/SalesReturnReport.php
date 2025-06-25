@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Reports;
 
 use App\Exports\SaleReturnExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -78,8 +79,11 @@ class SalesReturnReport extends Component
 
         $company = Setting::first();
 
-        $pdf = \PDF::loadView('reports::pdf.sales', ['data' => $data, 'company' =>  $company]);
-        return $pdf->stream(Carbon::now() . '-sales.pdf');
+        $pdfContent = PDF::loadView('reports::pdf.sales', ['data' => $data, 'company' =>  $company])->output();
+        return response()->streamDownload(
+            fn () => print($pdfContent),
+            Carbon::now() . '-sales.pdf'
+        );
     }
 
     public function query()

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Reports;
 
 use App\Exports\PurchaseReturnExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -79,8 +80,11 @@ class PurchasesReturnReport extends Component
 
         $company = Setting::first();
 
-        $pdf = \PDF::loadView('reports::pdf.purchase-return', ['data' => $data, 'company' =>  $company]);
-        return $pdf->stream(Carbon::now() . '-purchase-return.pdf');
+        $pdfContent = Pdf::loadView('reports::pdf.purchase-return', ['data' => $data, 'company' =>  $company])->output();
+        return response()->streamDownload(
+            fn () => print($pdfContent),
+            Carbon::now() . '-purchase-return.pdf'
+        );
     }
 
     public function query()
