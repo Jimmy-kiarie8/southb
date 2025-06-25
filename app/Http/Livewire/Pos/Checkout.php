@@ -7,6 +7,8 @@ use Livewire\Component;
 use Modules\People\Entities\Customer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Modules\Branch\Entities\ProductBranch;
 use Modules\Product\Entities\Product;
 
 class Checkout extends Component
@@ -38,6 +40,10 @@ class Checkout extends Component
     public $country;
     public $address;
     public $paymentMethods = [];
+
+    public $how_many;
+    public $search_results;
+    public $customer;
 
     public function mount($cartInstance, $customers)
     {
@@ -147,21 +153,36 @@ class Checkout extends Component
     {
         $cart = Cart::instance($this->cart_instance);
 
+        // Check branch-specific quantity first
+        $branch_id = Auth::user()->branch_id;
+        $productBranch = ProductBranch::where('product_id', $product['id'])
+                                      ->where('branch_id', $branch_id)
+                                      ->first();
+
+        $branch_quantity = $productBranch ? $productBranch->quantity : 0;
+
+        if ($branch_quantity <= 0) {
+            session()->flash('message', 'Product is out of stock in your branch!');
+            return;
+        }
+
         $exists = $cart->search(function ($cartItem, $rowId) use ($product) {
             return $cartItem->id == $product['id'];
         });
 
         if ($exists->isNotEmpty()) {
-            $rowId = $exists->first()->rowId; // Get the rowId of the existing cart item
+            $rowId = $exists->first()->rowId;
 
+            // Check if adding one more exceeds branch quantity
+            $current_qty = $exists->first()->qty;
+            if ($current_qty + 1 > $branch_quantity) {
+                session()->flash('message', 'Cannot add more of this product. Branch stock limit reached!');
+                return;
+            }
 
-            $this->addQuantity($rowId, $product['id']); // Use the rowId here
-
-            // session()->flash('message', 'Product exists in the cart!');
-
+            $this->addQuantity($rowId, $product['id']);
             return;
         } else {
-
             $cart->add([
                 'id'      => $product['id'],
                 'name'    => $product['product_name'],
@@ -173,7 +194,7 @@ class Checkout extends Component
                     'product_discount_type' => 'fixed',
                     'sub_total'             => $this->calculate($product)['sub_total'],
                     'code'                  => $product['product_code'],
-                    'stock'                 => $product['product_quantity'],
+                    'stock'                 => $branch_quantity, // Use branch quantity instead of global
                     'unit'                  => $product['product_unit'],
                     'product_tax'           => $this->calculate($product)['product_tax'],
                     'unit_price'            => $this->calculate($product)['unit_price'],
@@ -183,7 +204,7 @@ class Checkout extends Component
             ]);
         }
 
-        $this->check_quantity[$product['id']] = $product['product_quantity'];
+        $this->check_quantity[$product['id']] = $branch_quantity; // Use branch quantity
         $this->quantity[$product['id']] = 1;
         $this->discount_type[$product['id']] = 'fixed';
         $this->item_discount[$product['id']] = 0;
@@ -194,13 +215,20 @@ class Checkout extends Component
     {
         if ($this->quantity[$product_id] < 0.001) {
             session()->flash('message', 'Invalid quantity.');
-
             return;
         }
-        if ($this->check_quantity[$product_id] < $this->quantity[$product_id]) {
-            // session()->flash('message', 'The requested quantity is not available in stock.');
 
-            // return;
+        // Get branch-specific quantity
+        $branch_id = Auth::user()->branch_id;
+        $productBranch = ProductBranch::where('product_id', $product_id)
+                                      ->where('branch_id', $branch_id)
+                                      ->first();
+
+        $branch_quantity = $productBranch ? $productBranch->quantity : 0;
+
+        if ($branch_quantity < $this->quantity[$product_id]) {
+            session()->flash('message', 'The requested quantity is not available in your branch stock.');
+            return;
         }
 
         Cart::instance($this->cart_instance)->update($row_id, $this->quantity[$product_id]);
@@ -211,7 +239,7 @@ class Checkout extends Component
             'options' => [
                 'sub_total'             => $cart_item->price * $cart_item->qty,
                 'code'                  => $cart_item->options->code,
-                'stock'                 => $cart_item->options->stock,
+                'stock'                 => $branch_quantity, // Update with branch quantity
                 'unit'                  => $cart_item->options->unit,
                 'product_tax'           => $cart_item->options->product_tax,
                 'wholesale_price'       => $cart_item->options->wholesale_price,
@@ -225,6 +253,21 @@ class Checkout extends Component
 
     public function addQuantity($row_id, $product_id)
     {
+        // Get branch-specific quantity
+        $branch_id = Auth::user()->branch_id;
+        $productBranch = ProductBranch::where('product_id', $product_id)
+                                      ->where('branch_id', $branch_id)
+                                      ->first();
+
+        $branch_quantity = $productBranch ? $productBranch->quantity : 0;
+
+        $cart_item = Cart::instance($this->cart_instance)->get($row_id);
+        $current_qty = $cart_item->qty;
+
+        if ($current_qty + 1 > $branch_quantity) {
+            session()->flash('message', 'Cannot add more of this product. Branch stock limit reached!');
+            return;
+        }
 
         Cart::instance($this->cart_instance)->update($row_id, ($this->quantity[$product_id]++));
 
@@ -234,7 +277,7 @@ class Checkout extends Component
             'options' => [
                 'sub_total'             => $cart_item->price * $cart_item->qty,
                 'code'                  => $cart_item->options->code,
-                'stock'                 => $cart_item->options->stock,
+                'stock'                 => $branch_quantity, // Update with branch quantity
                 'unit'                  => $cart_item->options->unit,
                 'product_tax'           => $cart_item->options->product_tax,
                 'wholesale_price'       => $cart_item->options->wholesale_price,

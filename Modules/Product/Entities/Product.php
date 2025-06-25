@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Modules\Branch\Entities\Branch;
 use Modules\People\Entities\Supplier;
 use Modules\Product\Notifications\NotifyQuantityAlert;
@@ -120,7 +121,7 @@ class Product extends Model implements HasMedia
         // $totalQty = $this->branches()->sum('quantity');
         // return $totalQty;
 
-        $location_id = request('location_id'); // Assuming 'location_id' is passed as a query parameter
+        $location_id = Auth::user()->branch_id;
 
         $totalQty = $this->branches()->when($location_id, function ($q) use ($location_id) {
             return $q->where('branches.id', $location_id);

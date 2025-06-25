@@ -3,9 +3,11 @@
 namespace App\Http\Livewire;
 
 use Gloudemans\Shoppingcart\Facades\Cart;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Livewire\Component;
+use Modules\Branch\Entities\ProductBranch;
 use Modules\People\Entities\Customer;
 use Modules\Product\Entities\Product;
 use Modules\Purchase\Entities\Purchase;
@@ -193,6 +195,27 @@ class ProductCart extends Component
         }
 
         $price = 0;
+        $stock_quantity = $product['product_quantity']; // Default to product quantity
+
+        // Only check branch-specific stock when selling or processing purchase returns
+        if ($this->cart_instance == 'sale' || $this->cart_instance == 'sale_return') {
+            // Check branch-specific quantity
+            $branch_id = Auth::user()->branch_id;
+            $productBranch = ProductBranch::where('product_id', $product['id'])
+                                        ->where('branch_id', $branch_id)
+                                        ->first();
+
+            $branch_quantity = $productBranch ? $productBranch->quantity : 0;
+
+            // Prevent adding product with no stock in this branch
+            if ($branch_quantity <= 0) {
+                session()->flash('message', 'Product is out of stock in your branch!');
+                return;
+            }
+
+            // Use branch quantity instead of global product quantity
+            $stock_quantity = $branch_quantity;
+        }
 
         if ($this->cart_instance == 'purchase') {
             if (env('WHOLESALE_RETAIL')) {
@@ -221,7 +244,7 @@ class ProductCart extends Component
                 'sub_total'             => $this->calculate($product)['sub_total'],
                 'code'                  => $product['product_code'],
                 'moq'                  => $product['moq'],
-                'stock'                 => $product['product_quantity'],
+                'stock'                 => $stock_quantity, // Use branch quantity for sale, product quantity otherwise
                 'unit'                  => $product['product_unit'],
                 'product_tax'           => $this->calculate($product)['product_tax'],
                 'unit_price'            => ($this->cart_instance == 'purchase' || $this->cart_instance == 'lpo') ? $this->calculate($product)['product_cost'] :  $this->calculate($product)['unit_price'],
@@ -230,7 +253,7 @@ class ProductCart extends Component
         ]);
         $this->sale_type[$product['id']] = 'Wholesale'; // Set a default value if needed
 
-        $this->check_quantity[$product['id']] = $product['product_quantity'];
+        $this->check_quantity[$product['id']] = $stock_quantity; // Use appropriate quantity
         $this->quantity[$product['id']] = 1;
         $this->discount_type[$product['id']] = 'fixed';
         $this->item_discount[$product['id']] = 0;
@@ -260,9 +283,10 @@ class ProductCart extends Component
 
         $this->emit('cartUpdated'); // If you're using events
 
-
         $product = Product::select('id', 'moq', 'product_name')->find($product_id);
-        if ($this->cart_instance == 'sale' || $this->cart_instance == 'purchase_return') {
+
+        // Check MOQ
+        if ($this->cart_instance == 'sale' || $this->cart_instance == 'purchase_return' || $this->cart_instance == 'sale_return') {
             if ($product->moq) {
                 if ((int)$product->moq > $this->quantity[$product_id]) {
                     // Log::alert("Bellow");
@@ -270,8 +294,20 @@ class ProductCart extends Component
                     // return;
                 }
             }
-        }
 
+            // Check branch stock only for sales and returns
+            $branch_id = Auth::user()->branch_id;
+            $productBranch = ProductBranch::where('product_id', $product_id)
+                                        ->where('branch_id', $branch_id)
+                                        ->first();
+
+            $branch_quantity = $productBranch ? $productBranch->quantity : 0;
+
+            if ($branch_quantity < $this->quantity[$product_id]) {
+                session()->flash('message', 'The requested quantity is not available in your branch stock.');
+                return;
+            }
+        }
 
         Cart::instance($this->cart_instance)->update($row_id, $this->quantity[$product_id]);
 
