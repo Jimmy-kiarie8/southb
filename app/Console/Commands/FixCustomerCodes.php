@@ -53,12 +53,23 @@ class FixCustomerCodes extends Command
             return 0;
         }
 
-        DB::transaction(function () use ($sales, $payments) {
+        $fixedAt = now();
+
+        // The first original code is kept if a row is fixed more than once, so sales:revert-customer-codes always restores the true original.
+        DB::transaction(function () use ($sales, $payments, $fixedAt) {
             foreach ($sales as $sale) {
-                DB::table('sales')->where('id', $sale->id)->update(['clientcode' => $sale->new_code]);
+                DB::table('sales')->where('id', $sale->id)->update([
+                    'clientcode_before_fix' => DB::raw('IF(code_fixed_at IS NULL, clientcode, clientcode_before_fix)'),
+                    'code_fixed_at' => DB::raw('COALESCE(code_fixed_at, ' . DB::getPdo()->quote($fixedAt) . ')'),
+                    'clientcode' => $sale->new_code,
+                ]);
             }
             foreach ($payments as $payment) {
-                DB::table('sale_payments')->where('id', $payment->id)->update(['customer_code' => $payment->new_code]);
+                DB::table('sale_payments')->where('id', $payment->id)->update([
+                    'customer_code_before_fix' => DB::raw('IF(code_fixed_at IS NULL, customer_code, customer_code_before_fix)'),
+                    'code_fixed_at' => DB::raw('COALESCE(code_fixed_at, ' . DB::getPdo()->quote($fixedAt) . ')'),
+                    'customer_code' => $payment->new_code,
+                ]);
             }
         });
 
