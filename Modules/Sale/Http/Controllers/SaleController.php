@@ -345,11 +345,14 @@ class SaleController extends Controller
                 $sale_detail->delete();
             }
 
+            $customer = Customer::findOrFail($request->customer_id);
+
             $sale->update([
                 'date' => now(),
                 'reference' => $request->reference,
-                'customer_id' => $request->customer_id,
-                'customer_name' => Customer::findOrFail($request->customer_id)->customer_name,
+                'customer_id' => $customer->id,
+                'clientcode' => $customer->code,
+                'customer_name' => $customer->customer_name,
                 'tax_percentage' => ($request->tax_percentage) ? $request->tax_percentage : 0,
                 'discount_percentage' => $request->discount_percentage,
                 'shipping_amount' => $request->shipping_amount,

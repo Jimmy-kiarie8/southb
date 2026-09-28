@@ -59,8 +59,8 @@ class ClientReport extends Component
         if ($this->report_type === 'Payments') {
             $sales = SalePayment::whereDate('date', '>=', $this->start_date)
                 ->whereDate('date', '<=', $this->end_date)
-                ->when($customer_code, function ($query) use ($customer_code) {
-                    return $query->where('customer_code', $customer_code);
+                ->when($customer, function ($query) use ($customer) {
+                    return $query->whereHas('sale', $this->forCustomer($customer));
                 })
                 ->orderBy('date', 'desc')->paginate(10);
             $sales->transform(function ($sale) use ($customer) {
@@ -73,11 +73,8 @@ class ClientReport extends Component
 
             $sales = Sale::with(['saleDetails'])->whereDate('date', '>=', $this->start_date)
                 ->whereDate('date', '<=', $this->end_date)
-                ->when($customer_code, function ($query) use ($customer_code, $customer) {
-                    return $query->where(function ($q) use ($customer_code, $customer) {
-                        $q->where('clientcode', $customer_code)
-                            ->orWhere('customer_id', $customer->id);
-                    });
+                ->when($customer, function ($query) use ($customer) {
+                    return $query->where($this->forCustomer($customer));
                 })
                 ->when($this->payment_status, function ($query) {
                     return $query->where('payment_status', $this->payment_status);
@@ -124,11 +121,8 @@ class ClientReport extends Component
         $customer_code = $customer ? $customer->code : null;
 
         $sales = Sale::whereBetween('date', [$this->start_date, $this->end_date])
-            ->when($customer_code, function ($query) use ($customer_code, $customer) {
-                return $query->where(function ($q) use ($customer_code, $customer) {
-                    $q->where('clientcode', $customer_code)
-                        ->orWhere('customer_id', $customer->id);
-                });
+            ->when($customer, function ($query) use ($customer) {
+                return $query->where($this->forCustomer($customer));
             })
             ->when($this->payment_status, function ($query) {
                 return $query->where('payment_status', $this->payment_status);
@@ -156,8 +150,8 @@ class ClientReport extends Component
 
         $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)
             ->whereBetween('date', [$this->start_date, $this->end_date])
-            ->when($customer_code, function ($query) use ($customer_code) {
-                return $query->where('customer_code', $customer_code);
+            ->when($customer, function ($query) use ($customer) {
+                return $query->whereHas('sale', $this->forCustomer($customer));
             })
             ->get();
 
@@ -190,20 +184,26 @@ class ClientReport extends Component
         ];
     }
 
+    /**
+     * Sales belong to a customer by customer_id; clientcode is only used for older sales that have no customer_id.
+     * Payments are matched through their sale with the same rule, so both sides of the statement always agree.
+     */
+    private function forCustomer($customer)
+    {
+        return function ($query) use ($customer) {
+            $query->where('customer_id', $customer->id)
+                ->orWhere(function ($q) use ($customer) {
+                    $q->whereNull('customer_id')->where('clientcode', $customer->code);
+                });
+        };
+    }
+
     private function calculateRunningBalance($customer_code, $customer)
     {
         $startDate = Carbon::parse($this->start_date)->startOfDay();
 
-        // Use a more consistent approach for customer identification
-        $customerConditions = function ($query) use ($customer_code, $customer) {
-            $query->where(function ($q) use ($customer_code, $customer) {
-                $q->where('clientcode', $customer_code)
-                    ->orWhere('customer_id', $customer->id);
-            });
-        };
-
         // Calculate total sales
-        $total_sales = Sale::where($customerConditions)
+        $total_sales = Sale::where($this->forCustomer($customer))
             ->whereDate('date', '<', $startDate)
             // ->where('status', '!=', 'Paid')
             ->sum('total_amount');
@@ -223,7 +223,7 @@ class ClientReport extends Component
         //     ->sum('amount');
 
         $individual_payments = SalePayment::whereDate('date', '<', $startDate)
-            ->where('customer_code', $customer_code)
+            ->whereHas('sale', $this->forCustomer($customer))
             ->sum('amount');
 
         return $individual_payments;
@@ -239,11 +239,8 @@ class ClientReport extends Component
             $customer_code = $customer->code;
         }
         // Retrieve sales
-        $sales = Sale::when($customer_code, function ($query) use ($customer_code, $customer) {
-            return $query->where(function ($q) use ($customer_code, $customer) {
-                $q->where('clientcode', $customer_code)
-                    ->orWhere('customer_id', $customer->id);
-            });
+        $sales = Sale::when($customer, function ($query) use ($customer) {
+            return $query->where($this->forCustomer($customer));
         })->when($this->payment_status, function ($query) {
             return $query->where('payment_status', $this->payment_status);
         })
@@ -270,7 +267,11 @@ class ClientReport extends Component
 
 
 
-        $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)->where('customer_code', $customer_code)->get();
+        $payments = SalePayment::whereNotIn('reference', $bulk_payments_ids)
+            ->when($customer, function ($query) use ($customer) {
+                return $query->whereHas('sale', $this->forCustomer($customer));
+            })
+            ->get();
 
 
 

@@ -106,11 +106,14 @@ class SaleApiController extends Controller
                 $payment_status = 'Paid';
             }
 
+            $customer = Customer::findOrFail($request->customer_id);
+
             $sale = Sale::create([
                 'date' => now()->format('Y-m-d'),
                 'reference' => 'PSL',
-                'customer_id' => $request->customer_id,
-                'customer_name' => Customer::findOrFail($request->customer_id)->customer_name,
+                'customer_id' => $customer->id,
+                'clientcode' => $customer->code,
+                'customer_name' => $customer->customer_name,
                 'tax_percentage' => ($request->tax_percentage) ? $request->tax_percentage : 0,
                 'discount_percentage' => $request->discount_percentage,
                 'shipping_amount' => $request->shipping_amount,

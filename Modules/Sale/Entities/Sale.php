@@ -72,6 +72,21 @@ class Sale extends Model
             });
         });
 
+        static::saving(function ($model) {
+            if ($model->customer_id) {
+                $code = Customer::whereKey($model->customer_id)->value('code');
+                if ($code) {
+                    $model->clientcode = $code;
+                }
+            }
+        });
+
+        static::updated(function ($model) {
+            if ($model->wasChanged('clientcode')) {
+                SalePayment::where('sale_id', $model->id)->update(['customer_code' => $model->clientcode]);
+            }
+        });
+
         static::deleting(function ($product) {
             if ($product->product_quantity > 0) {
                 throw new \Exception('Cannot delete sale with quantity');

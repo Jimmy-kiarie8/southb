@@ -223,7 +223,12 @@ class SalePaymentsController extends Controller
         // return $request->all();
         $amount = $request->amount;
         $customer = Customer::find($request->customer_id);
-        $sales = Sale::where('due_amount', '>', 0)->where('clientcode', $customer->code)->orderBy('id', 'ASC')->get();
+        $sales = Sale::where('due_amount', '>', 0)
+            ->where(function ($q) use ($customer) {
+                $q->where('customer_id', $customer->id)
+                    ->orWhere(fn ($q) => $q->whereNull('customer_id')->where('clientcode', $customer->code));
+            })
+            ->orderBy('id', 'ASC')->get();
 
         $sale_payment = SaleBulkPayment::create([
             'client_id' => $request->customer_id,

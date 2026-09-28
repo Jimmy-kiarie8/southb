@@ -16,6 +16,19 @@ class SalePayment extends Model
     protected $guarded = [];
     protected $with = ['sale'];
 
+    public static function boot() {
+        parent::boot();
+
+        static::saving(function ($model) {
+            if ($model->sale_id) {
+                $code = Sale::withoutGlobalScopes()->whereKey($model->sale_id)->value('clientcode');
+                if ($code) {
+                    $model->customer_code = $code;
+                }
+            }
+        });
+    }
+
     public function sale() {
         return $this->belongsTo(Sale::class, 'sale_id', 'id');
     }
