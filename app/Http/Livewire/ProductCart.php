@@ -217,20 +217,24 @@ class ProductCart extends Component
             $stock_quantity = $branch_quantity;
         }
 
+        $prices = $this->calculate($product);
+
         if ($this->cart_instance == 'purchase') {
-            if (env('WHOLESALE_RETAIL')) {
-                $price = $this->calculate($product)['wholesale_price'];
+            if (env('WHOLESALE_RETAIL') && !empty($prices['wholesale_price'])) {
+                $price = $prices['wholesale_price'];
             } else {
-                $price = $this->calculate($product)['cost_price'];
+                $price = $prices['cost_price'];
             }
         } else {
 
-            if (env('WHOLESALE_RETAIL')) {
-                $price = $this->calculate($product)['wholesale_price'];
+            if (env('WHOLESALE_RETAIL') && !empty($prices['wholesale_price'])) {
+                $price = $prices['wholesale_price'];
             } else {
-                $price = $this->calculate($product)['price'];
+                $price = $prices['price'];
             }
         }
+
+        $price = (float) $price;
 
         $cart->add([
             'id'      => $product['id'],

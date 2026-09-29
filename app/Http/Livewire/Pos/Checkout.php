@@ -187,7 +187,7 @@ class Checkout extends Component
                 'id'      => $product['id'],
                 'name'    => $product['product_name'],
                 'qty'     => 1,
-                'price'   => ($this->sale_type == 'Wholesale') ? $this->calculate($product)['wholesale_price'] : $this->calculate($product)['price'],
+                'price'   => (float) (($this->sale_type == 'Wholesale' && !empty($this->calculate($product)['wholesale_price'])) ? $this->calculate($product)['wholesale_price'] : $this->calculate($product)['price']),
                 'weight'  => 1,
                 'options' => [
                     'product_discount'      => 0.00,
