@@ -138,6 +138,7 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Reference</th>
+                                <th>CU Inv No.</th>
                                 <th>Customer</th>
                                 <th>Status</th>
                                 <th>Total</th>
@@ -151,6 +152,7 @@
                                 <tr>
                                     <td>{{ \Carbon\Carbon::parse($sale->date)->format('d M, Y') }}</td>
                                     <td>{{ $sale->reference }}</td>
+                                    <td>{{ $sale->cu_inv_no }}</td>
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>
                                         @if ($sale->status == 'Pending')
@@ -189,7 +191,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8">
+                                    <td colspan="9">
                                         <span class="text-danger">No Sales Data Available!</span>
                                     </td>
                                 </tr>

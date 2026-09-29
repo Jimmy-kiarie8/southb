@@ -26,7 +26,7 @@ class SaleExport implements FromQuery, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-           ['Date', 'Reference', 'Customer name', 'Status', 'Total', 'Paid', 'Due', 'Payment status', 'Comments']
+           ['Date', 'Reference', 'CU Inv No.', 'Customer name', 'Status', 'Total', 'Paid', 'Due', 'Payment status', 'Comments']
         ];
     }
 
@@ -35,6 +35,7 @@ class SaleExport implements FromQuery, WithHeadings, WithMapping
         return [
             $sale->date,
             $sale->reference,
+            $sale->cu_inv_no,
             $sale->customer_name,
             $sale->status,
             $sale->total_amount,

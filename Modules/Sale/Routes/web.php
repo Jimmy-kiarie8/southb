@@ -110,6 +110,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/sale-bulk-payment', 'SalePaymentsController@sale_bulk')->name('sale-payments.sale-bulk');
 
 
+    Route::get('/client-balance', 'SalePaymentsController@clientBalance')->name('sale-payments.client-balance');
+
     Route::get('/bulk-payments', 'SalePaymentsController@bulkIndex')->name('sale-payments.bulkIndex');
     Route::get('/bulk-payments/{id}', 'SalePaymentsController@bulkShow')->name('sale-payments.bulkShow');
 

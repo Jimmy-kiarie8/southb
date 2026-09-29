@@ -186,6 +186,14 @@
                     <i class="c-sidebar-nav-icon bi bi-cash" style="line-height: 1;"></i> Receipts
                 </a>
             </li>
+
+            @can('access_sale_payments')
+                <li class="c-sidebar-nav-item">
+                    <a class="c-sidebar-nav-link {{ request()->routeIs('sale-payments.client-balance') ? 'c-active' : '' }}" href="{{ route('sale-payments.client-balance') }}">
+                        <i class="c-sidebar-nav-icon bi bi-wallet2" style="line-height: 1;"></i> Balance Client Statement
+                    </a>
+                </li>
+            @endcan
         </ul>
     </li>
 @endcan

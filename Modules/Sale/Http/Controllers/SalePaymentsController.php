@@ -269,6 +269,12 @@ class SalePaymentsController extends Controller
         return $dataTable->render('sale::payments.bulk');
     }
 
+    public function clientBalance()
+    {
+        abort_if(Gate::denies('access_sale_payments'), 403);
+        return view('sale::payments.client-balance');
+    }
+
     public function bulkShow($id)
     {
         $payment = SaleBulkPayment::with(['payments' => function ($q) {

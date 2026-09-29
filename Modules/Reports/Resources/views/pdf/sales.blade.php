@@ -142,6 +142,7 @@
                         <th>#</th>
                         <th>Date</th>
                         <th>Order No.</th>
+                        <th>CU Inv No.</th>
                         <th>Customer name</th>
                         <th>Total amount</th>
                         <th>Paid amount</th>
@@ -154,6 +155,7 @@
                         <td>{{ $key + 1 }}</td>
                         <td>{{ $product->created_at }}</td>
                         <td>{{ $product->reference }}</td>
+                        <td>{{ $product->cu_inv_no }}</td>
                         <td>{{ $product->customer_name }}</td>
                         <td>{{ format_currency($product->total_amount) }}</td>
                         <td>{{ format_currency($product->paid_amount) }}</td>
@@ -163,7 +165,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="5"></th>
+                        <th colspan="6"></th>
                         <th>Total</th>
                         <th colspan="2">{{ format_currency($sum) }}</th>
                     </tr>
