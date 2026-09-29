@@ -208,7 +208,7 @@ class ProductCart extends Component
             $branch_quantity = $productBranch ? $productBranch->quantity : 0;
 
             // Prevent adding product with no stock in this branch
-            if ($branch_quantity <= 0) {
+            if (!env('ALLOW_OUT_OF_STOCK_SALES') && $branch_quantity <= 0) {
                 session()->flash('message', 'Product is out of stock in your branch!');
                 return;
             }
@@ -303,7 +303,7 @@ class ProductCart extends Component
 
             $branch_quantity = $productBranch ? $productBranch->quantity : 0;
 
-            if ($branch_quantity < $this->quantity[$product_id]) {
+            if (!env('ALLOW_OUT_OF_STOCK_SALES') && $branch_quantity < $this->quantity[$product_id]) {
                 session()->flash('message', 'The requested quantity is not available in your branch stock.');
                 return;
             }

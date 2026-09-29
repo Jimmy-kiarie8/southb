@@ -161,7 +161,7 @@ class Checkout extends Component
 
         $branch_quantity = $productBranch ? $productBranch->quantity : 0;
 
-        if ($branch_quantity <= 0) {
+        if (!env('ALLOW_OUT_OF_STOCK_SALES') && $branch_quantity <= 0) {
             session()->flash('message', 'Product is out of stock in your branch!');
             return;
         }
@@ -175,7 +175,7 @@ class Checkout extends Component
 
             // Check if adding one more exceeds branch quantity
             $current_qty = $exists->first()->qty;
-            if ($current_qty + 1 > $branch_quantity) {
+            if (!env('ALLOW_OUT_OF_STOCK_SALES') && $current_qty + 1 > $branch_quantity) {
                 session()->flash('message', 'Cannot add more of this product. Branch stock limit reached!');
                 return;
             }
@@ -226,7 +226,7 @@ class Checkout extends Component
 
         $branch_quantity = $productBranch ? $productBranch->quantity : 0;
 
-        if ($branch_quantity < $this->quantity[$product_id]) {
+        if (!env('ALLOW_OUT_OF_STOCK_SALES') && $branch_quantity < $this->quantity[$product_id]) {
             session()->flash('message', 'The requested quantity is not available in your branch stock.');
             return;
         }
@@ -264,7 +264,7 @@ class Checkout extends Component
         $cart_item = Cart::instance($this->cart_instance)->get($row_id);
         $current_qty = $cart_item->qty;
 
-        if ($current_qty + 1 > $branch_quantity) {
+        if (!env('ALLOW_OUT_OF_STOCK_SALES') && $current_qty + 1 > $branch_quantity) {
             session()->flash('message', 'Cannot add more of this product. Branch stock limit reached!');
             return;
         }
