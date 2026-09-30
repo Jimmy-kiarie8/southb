@@ -157,7 +157,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="5"></td>
+                        <td colspan="6"></td>
                         <td>Balance B/F</td>
                         <td>{{ format_currency($running_balance) }}</td>
                     </tr>

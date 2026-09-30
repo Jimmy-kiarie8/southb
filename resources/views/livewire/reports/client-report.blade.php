@@ -42,7 +42,7 @@
                             <div class="col-lg-4">
                                 <div class="form-group">
                                     <label>Status</label>
-                                    <select wire:model.defer="report_type" class="form-control" name="report_type">
+                                    <select wire:model.defer="payment_status" class="form-control" name="payment_status">
                                         <option value="">Select type</option>
                                         <option value="Paid">Paid</option>
                                         <option value="Credit">Credit</option>

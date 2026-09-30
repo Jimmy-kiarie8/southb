@@ -222,11 +222,19 @@ class ClientReport extends Component
         //     ->where('client_id', $customer->id)  // Use consistent ID
         //     ->sum('amount');
 
-        $individual_payments = SalePayment::whereDate('date', '<', $startDate)
+        $payments = SalePayment::whereDate('date', '<', $startDate)
             ->whereHas('sale', $this->forCustomer($customer))
-            ->sum('amount');
+            ->get(['id', 'sale_id', 'date', 'amount', 'reference']);
 
-        return $individual_payments;
+        Log::info('bf_payments', [
+            'database' => DB::connection()->getDatabaseName(),
+            'customer_id' => $customer->id,
+            'start_date' => $startDate->toDateString(),
+            'count' => $payments->count(),
+            'rows' => $payments->map(fn ($p) => [$p->id, $p->sale_id, $p->date, $p->amount, $p->reference])->values()->all(),
+        ]);
+
+        return $payments->sum('amount');
     }
 
 
